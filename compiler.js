@@ -79,6 +79,107 @@ const SCRATCH_TEMPLATE = {
 
 let EMBEDDED_ASSETS = window.EMBEDDED_SCRATCH_ASSETS || {};
 
+function cleanAndRepairJson(raw) {
+    if (!raw || typeof raw !== 'string') return { parsed: raw, text: raw, repaired: false };
+    
+    let text = raw.trim();
+    let wasRepaired = false;
+    
+    // 1. Eliminar bloques de código markdown si los hay (```json ... ``` o ``` ... ```)
+    if (/^```(?:json|JSON)?/i.test(text) || /```$/.test(text)) {
+        text = text.replace(/^```(?:json|JSON)?\s*\n?/i, '').replace(/\n?```\s*$/, '').trim();
+        wasRepaired = true;
+    }
+    
+    // 2. Extraer el bloque JSON más externo si hay texto explicativo antes o después
+    const firstBrace = text.indexOf('{');
+    const lastBrace = text.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace && (firstBrace > 0 || lastBrace < text.length - 1)) {
+        text = text.substring(firstBrace, lastBrace + 1);
+        wasRepaired = true;
+    }
+    
+    // 3. Reemplazar comillas tipográficas / curvas (“ ”, „ ”, « ») por comillas rectas estándar (")
+    if (/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/.test(text)) {
+        text = text.replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/g, '"');
+        text = text.replace(/[\u2018\u2019]/g, "'");
+        wasRepaired = true;
+    }
+
+    // 4. Intentar parseo directo inicial
+    try {
+        const parsed = JSON.parse(text);
+        return { parsed, text, repaired: wasRepaired };
+    } catch (initialErr) {
+        // Proceder con correcciones sintácticas si el parseo estricto falló
+    }
+
+    // 5. Reparación de comas faltantes entre líneas (missing commas)
+    let repairedText = text.replace(/([0-9]|true|false|null|"|\}|\])\s*\n\s*("|\{|\[)/g, (match, p1, p2) => {
+        if (match.includes(',')) return match;
+        wasRepaired = true;
+        return `${p1},\n  ${p2}`;
+    });
+
+    // 6. Reparación de comas sobrantes (trailing commas) fuera de cadenas de texto
+    let cleaned = '';
+    let inString = false;
+    let escape = false;
+
+    for (let i = 0; i < repairedText.length; i++) {
+        const char = repairedText[i];
+
+        if (inString) {
+            cleaned += char;
+            if (escape) {
+                escape = false;
+            } else if (char === '\\') {
+                escape = true;
+            } else if (char === '"') {
+                inString = false;
+            }
+        } else {
+            if (char === '"') {
+                inString = true;
+                cleaned += char;
+            } else if (char === ',') {
+                let j = i + 1;
+                while (j < repairedText.length && /\s/.test(repairedText[j])) {
+                    j++;
+                }
+                if (j < repairedText.length && (repairedText[j] === '}' || repairedText[j] === ']')) {
+                    wasRepaired = true;
+                    continue;
+                }
+                cleaned += char;
+            } else {
+                cleaned += char;
+            }
+        }
+    }
+
+    // 7. Intentar parseo tras las reparaciones
+    try {
+        const parsed = JSON.parse(cleaned);
+        return { parsed, text: cleaned, repaired: true };
+    } catch (repairErr) {
+        const posMatch = repairErr.message.match(/at position (\d+)/);
+        let errorDetails = repairErr.message;
+        
+        if (posMatch) {
+            const pos = parseInt(posMatch[1], 10);
+            const lines = cleaned.substring(0, pos).split('\n');
+            const lineNum = lines.length;
+            const colNum = lines[lines.length - 1].length + 1;
+            const allLines = cleaned.split('\n');
+            const snippet = allLines.slice(Math.max(0, lineNum - 3), Math.min(allLines.length, lineNum + 2)).join('\n');
+            errorDetails = `Línea ${lineNum}, Columna ${colNum}: ${repairErr.message}\nFragmento:\n${snippet}`;
+        }
+        
+        throw new Error(errorDetails);
+    }
+}
+
 class ScratchCompiler {
     constructor() {
         this.zip = null;
@@ -495,7 +596,7 @@ class ScratchCompiler {
                     blob = await this.fetchExternalImage(cost.url);
                     if (blob) {
                         assetId = generateId('cost_').toLowerCase();
-                        const ext = cost.url.split('.').pop().split('?')[0] || 'png';
+                        const ext = (cost.url.split('.').pop().split('?')[0] || 'png').toLowerCase();
                         filename = `${assetId}.${ext}`;
                     }
                 }
@@ -591,7 +692,7 @@ class ScratchCompiler {
                     const bdBlob = await this.fetchExternalImage(bd.url);
                     if (bdBlob) {
                         const assetId = generateId('bd_').toLowerCase();
-                        const ext = bd.url.split('.').pop().split('?')[0] || 'jpg';
+                        const ext = (bd.url.split('.').pop().split('?')[0] || 'jpg').toLowerCase();
                         const filename = `${assetId}.${ext}`;
                         this.zip.file(filename, bdBlob);
 
@@ -726,9 +827,16 @@ class ScratchCompiler {
 
         let parsed;
         try {
-            parsed = JSON.parse(jsonString);
+            const cleanRes = cleanAndRepairJson(jsonString);
+            parsed = cleanRes.parsed;
+            if (cleanRes.repaired) {
+                Console.log("⚡ JSON saneado automáticamente (se eliminaron bloques de markdown o comas irregulares).", 'warning');
+                const inputEl = document.getElementById('json-input');
+                if (inputEl) inputEl.value = JSON.stringify(parsed, null, 2);
+            }
         } catch (e) {
-            Console.log(`Error de sintaxis JSON: ${e.message}`, 'error');
+            Console.log(`Error de sintaxis JSON:\n${e.message}`, 'error');
+            Console.log("💡 Sugerencia: Verifique que no falten comas entre propiedades o elementos de listas, ni sobren comas antes de '}' o ']'.", 'info');
             throw e;
         }
 
@@ -825,11 +933,15 @@ document.getElementById('format-btn')?.addEventListener('click', () => {
     const input = document.getElementById('json-input').value.trim();
     if (!input) return;
     try {
-        const obj = JSON.parse(input);
-        document.getElementById('json-input').value = JSON.stringify(obj, null, 2);
-        Console.log("JSON formateado correctamente.", "success");
+        const cleanRes = cleanAndRepairJson(input);
+        document.getElementById('json-input').value = JSON.stringify(cleanRes.parsed, null, 2);
+        if (cleanRes.repaired) {
+            Console.log("JSON auto-reparado (comas sobrantes/markdown corregidos) e indentado correctamente.", "success");
+        } else {
+            Console.log("JSON formateado correctamente.", "success");
+        }
     } catch (e) {
-        Console.log("No se pudo formatear: el texto contiene errores de sintaxis JSON.", "error");
+        Console.log(`No se pudo formatear: ${e.message}`, "error");
     }
 });
 
