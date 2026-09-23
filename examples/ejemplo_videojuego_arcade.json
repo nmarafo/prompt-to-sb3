@@ -1,0 +1,61 @@
+{
+  "name": "Super_Arcade_Defender",
+  "category": "videojuego",
+  "description": "Videojuego arcade espacial: controla la nave con las teclas izquierda/derecha y esquiva obstáculos espaciales",
+  "backdrop": {
+    "name": "Espacio_Exterior",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/NGC_4414_%28NASA-med%29.jpg/320px-NGC_4414_%28NASA-med%29.jpg"
+  },
+  "variables": {
+    "puntos": 0,
+    "vidas": 3
+  },
+  "sprites": [
+    {
+      "name": "NaveJugador",
+      "costumes": ["costume1"],
+      "x": 0,
+      "y": -130,
+      "size": 80,
+      "scripts": [
+        [
+          { "type": "start" },
+          { "type": "say", "text": "¡Usa las flechas izquierda y derecha para mover la nave!", "seconds": 3 }
+        ],
+        [
+          { "type": "when_key", "key": "right arrow" },
+          { "type": "changex", "dx": 20 },
+          { "type": "bounce_edge" }
+        ],
+        [
+          { "type": "when_key", "key": "left arrow" },
+          { "type": "changex", "dx": -20 },
+          { "type": "bounce_edge" }
+        ],
+        [
+          { "type": "when_key", "key": "space" },
+          { "type": "playsound", "name": "pop" },
+          { "type": "change_var", "name": "puntos", "by": 10 }
+        ]
+      ]
+    },
+    {
+      "name": "Asteroide",
+      "costumes": ["costume2"],
+      "x": 0,
+      "y": 140,
+      "size": 70,
+      "actions": [
+        { "type": "start" },
+        { "type": "move", "x": 0, "y": 140 },
+        {
+          "type": "forever",
+          "actions": [
+            { "type": "changey", "dy": -10 },
+            { "type": "wait", "seconds": 0.05 }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -8,7 +8,33 @@
 
 > 🚀 **Aplicación web en vivo**: Pueden acceder directamente al compilador sin instalación previa en **[https://nmarafo.github.io/prompt-to-sb3/](https://nmarafo.github.io/prompt-to-sb3/)**.
 
-**prompt-to-sb3** es un ecosistema de código y conocimiento abierto basado en el estándar **Open Knowledge Framework (OKF)** que permite transformar documentos de investigación, situaciones de aprendizaje y consignas didácticas en proyectos interactivos ejecutables de **Scratch 3.0 (`.sb3`)**, utilizando **Google NotebookLM** y agentes de Inteligencia Artificial generativa.
+**prompt-to-sb3** es un ecosistema universal de código y conocimiento abierto basado en el estándar **Open Knowledge Framework (OKF)** que permite transformar documentos de investigación, especificaciones de **videojuegos, visores interactivos, galerías multimedia, animaciones o simulaciones** en proyectos ejecutables de **Scratch 3.0 (`.sb3`)**, utilizando **Google NotebookLM** y agentes de Inteligencia Artificial generativa.
+
+---
+
+## 🕹️ Ámbitos de Aplicación y Versatilidad
+
+El estándar y el motor de compilación no están restringidos al diseño didáctico; proporcionan soporte integral para:
+
+* 🎮 **Videojuegos de Acción y Arcade**:
+  - Eventos de teclado (`when_key` con flechas direccionales o barra espaciadora).
+  - Bucles de juego continuos (`forever`) para gravedad, desplazamientos y patrullajes.
+  - Rebote automático en los límites de la pantalla (`bounce_edge`).
+  - Marcadores de puntuación, vidas y cronómetros (`variables`).
+  - Múltiples objetos interactuando (`sprites`): Jugador, Obstáculos y Coleccionables.
+
+* 🖼️ **Visores Interactivos y Galerías**:
+  - Navegación entre obras, fotografías o diapositivas (`next_backdrop` o `next_costume`).
+  - Botones interactivos de avance o retroceso accionados por clic (`when_clicked`).
+  - Rótulos y paneles informativos dinámicos (`say`, `think`).
+
+* 🎬 **Animaciones y Cinemáticas**:
+  - Desplazamientos cartesianos coordinados (`move`, `glide`, `wait`).
+  - Comunicación entre personajes mediante mensajes (`broadcast` y `when_receive`).
+
+* 🧪 **Simulaciones y Experiencias Didácticas**:
+  - Cuestionarios interactivos con entrada de texto (`ask`).
+  - Conmutación de estados y visibilidad (`show`, `hide`, `set_size`).
 
 ---
 
@@ -29,24 +55,22 @@ proyecto_scratch.sb3  ──(renombrar a .zip)──►  [Archivo Comprimido ZIP
 1. **`project.json`**: Es el archivo neurálgico del proyecto. Contiene la lista de *targets* (el escenario `Stage` y los personajes `Sprites`), las variables, las listas y un árbol de bloques interconectados mediante punteros de identificación alfanuméricos (`opcode`, `next`, `parent`, `inputs`).
 2. **Archivos multimedia**: Cada disfraz gráfico (`.svg`, `.png`) o sonido (`.wav`, `.mp3`) se guarda con el nombre de su resumen criptográfico hash **MD5** seguido de su extensión.
 
-La herramienta **prompt-to-sb3** resuelve la dificultad que tienen los modelos de lenguaje para generar cientos de punteros hexadecimales y matrices complejas de bloques de bajo nivel, proporcionando un **esquema semántico limpio** y un **compilador web en HTML/JS** que ensambla el archivo `.sb3` definitivo de forma automática.
+La herramienta **prompt-to-sb3** resuelve la dificultad que tienen los modelos de lenguaje para generar cientos de punteros hexadecimales y matrices complejas de bloques de bajo nivel, proporcionando un **esquema semántico universal** y un **compilador web en HTML/JS** que ensambla el archivo `.sb3` definitivo de forma automática.
 
 ---
 
-## 🚀 Flujo de Trabajo en Google NotebookLM (Protocolo de 3 Fases)
-
-Para construir un proyecto educativo en Scratch a partir de apuntes, libros de texto o investigaciones temáticas, sigan este protocolo paso a paso:
+## 🚀 Flujo de Trabajo en Google NotebookLM (Protocolo Universal de 3 Fases)
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                        PROTOCOLO DE 3 FASES CON NOTEBOOKLM                             │
+│                        PROTOCOLO UNIVERSAL DE 3 FASES CON NOTEBOOKLM                   │
 ├────────────────────────┬───────────────────────────────┬───────────────────────────────┤
-│  FASE 0: ASSETS WEB    │  FASE 1: GUION PEDAGÓGICO     │  FASE 2: MASTER PROMPT JSON   │
+│  FASE 0: ASSETS WEB    │  FASE 1: DISEÑO DEL PROYECTO  │  FASE 2: MASTER PROMPT JSON   │
 ├────────────────────────┼───────────────────────────────┼───────────────────────────────┤
 │ En "Buscar fuentes en  │ En el chat del cuaderno:      │ En el chat del cuaderno:      │
-│ la Web", localizar     │ Estructurar la situación de   │ Generar el JSON estructurado  │
-│ imágenes en Wikimedia  │ aprendizaje, la narrativa     │ con las URLs de los assets    │
-│ con enlace directo.    │ y los retos de evaluación.    │ y las acciones interactivas.  │
+│ la Web", localizar     │ Diseñar las mecánicas (juego, │ Generar el JSON estructurado  │
+│ imágenes en Wikimedia  │ visor, controles y variables) │ universal con las URLs de     │
+│ con enlace directo.    │ a partir de las fuentes.      │ assets y acciones interactivas│
 └────────────────────────┴───────────────────────────────┴───────────────────────────────┘
 ```
 
@@ -57,60 +81,57 @@ Para construir un proyecto educativo en Scratch a partir de apuntes, libros de t
 En su cuaderno de Google NotebookLM, abran el panel lateral de fuentes (`+ Añadir fuentes`), hagan clic en **«Buscar fuentes en la Web»** y peguen la siguiente instrucción adaptando el tema entre corchetes:
 
 ```text
-Busca imágenes y recursos visuales en Wikimedia Commons y repositorios de dominio público sobre [INTRODUZCA EL TEMA, PERSONAJE O CONTEXTO HISTÓRICO, ej: Benito Pérez Galdós en Gran Canaria / El Ciclo del Agua / Los Volcanes de Canarias].
-Requisitos:
-1. Necesito URLs directas y completas a imágenes (.svg, .png o .jpg), preferiblemente alojadas en upload.wikimedia.org.
-2. Identifica un retrato o figura en plano recortado para el personaje principal (Sprite).
-3. Identifica una imagen panorámica o escena de fondo para el escenario (Backdrop).
-4. Presenta el resultado en una tabla con tres columnas: Elemento (Personaje/Fondo), Descripción pedagógica y URL directa de la imagen.
-```
-
-> **Resultado**: NotebookLM indexará esas páginas y guardará las URLs exactas de las imágenes en su memoria contextual para incorporarlas en el JSON de Scratch.
-
----
-
-### 📝 Fase 1: Prompt de Guion Pedagógico e Instruccional
-
-Una vez añadidas las fuentes teóricas y las fuentes web de imágenes, introduzcan en el chat de consultas de NotebookLM:
-
-```text
-Actúa como un Asesor Pedagógico experto en Tecnología Educativa y Diseño Universal para el Aprendizaje (DUA).
-A partir de las fuentes que tenemos en este cuaderno, diseña la estructura completa de un proyecto interactivo en Scratch 3.0 sobre este tema.
-
-Estructura el guion con los siguientes apartados:
-1. Justificación Didáctica (etapa educativa, saberes básicos y competencia específica LOMLOE).
-2. Personajes participantes (asociando las URLs directas de imágenes encontradas en la búsqueda web).
-3. Fondo del escenario (asociando la URL del fondo encontrado).
-4. Escaleta de Escenas y Diálogos: rediseña el contenido en forma de narrativa paso a paso (mínimo 15 intervenciones) donde el personaje guíe al alumnado, explique conceptos clave, plantee retos y realice preguntas interactivas tipo quiz con retroalimentación.
+Busca imágenes y recursos visuales en Wikimedia Commons y repositorios de acceso público sobre [INTRODUZCA TEMA, ej: Naves espaciales y meteoritos / Obras de arte / Paisajes / Personajes].
+Requisitos técnicos:
+1. Necesito URLs directas a archivos de imagen (.png con fondo transparente o .svg, o fotografías .jpg panorámicas), alojadas preferiblemente en upload.wikimedia.org.
+2. Identifica:
+   - Imágenes para personajes, objetos o botones (Sprites).
+   - Imágenes panorámicas para escenarios o diapositivas (Backdrops).
+3. Presenta los resultados en una tabla clara: Elemento, Uso sugerido en Scratch y URL directa de la imagen.
 ```
 
 ---
 
-### ⚡ Fase 2: Master Prompt de Generación del JSON de Scratch
+### 📝 Fase 1: Prompt de Diseño del Proyecto
 
-Cuando el guion esté ajustado a sus necesidades, soliciten a NotebookLM la conversión al esquema semántico del compilador:
+En el chat de NotebookLM, introduzcan:
 
 ```text
-Basándote en el guion didáctico y las fuentes de este cuaderno, genera el código JSON para la herramienta Scratch Compiler Tool (prompt-to-sb3).
+Actúa como un Diseñador y Programador de Software Interactivo en Scratch 3.0.
+A partir de las fuentes y elementos gráficos de este cuaderno, diseña la arquitectura de un proyecto [TIPO: videojuego / visor interactivo / simulación / animación]:
+1. Objetivo y reglas de la experiencia.
+2. Objetos participantes (Sprites) y fondos (Backdrops) vinculando las URLs obtenidas en la Fase 0.
+3. Controles de usuario (teclas de flechas, espacio o clics con el ratón).
+4. Variables de estado ('puntos', 'vidas', 'diapositiva' o 'tiempo').
+```
+
+---
+
+### ⚡ Fase 2: Master Prompt de Generación del JSON Universal
+
+```text
+Basándote en el diseño anterior, genera el código JSON universal para la herramienta Scratch Compiler Tool (prompt-to-sb3).
 
 REGLAS TÉCNICAS OBLIGATORIAS:
-1. Devuelve ÚNICAMENTE el bloque de código JSON crudo (sin texto introductorio, sin explicaciones ni comentarios).
-2. Utiliza exactamente las URLs directas identificadas en la Fase 0 para 'backdrop' y 'costumes'.
-3. Cumple estrictamente esta estructura:
+1. Devuelve ÚNICAMENTE el bloque JSON crudo (sin texto antes ni después).
+2. Para videojuegos o proyectos multi-objeto, utiliza el array 'sprites' con sus 'scripts' o 'actions'.
+3. Para visores o galerías, puedes usar un array en 'backdrop' con múltiples imágenes y la acción 'next_backdrop'.
+4. Formato de ejemplo (Videojuego/Visor):
 {
-  "name": "Titulo_Del_Proyecto",
-  "backdrop": { "name": "NombreFondo", "url": "URL_DIRECTA_FONDO" },
-  "costumes": [
-    { "name": "NombrePersonaje", "url": "URL_DIRECTA_DISFRAZ" }
-  ],
-  "variables": { "puntos": 0 },
-  "actions": [
-    { "type": "start" },
-    { "type": "move", "x": 0, "y": -40 },
-    { "type": "say", "text": "¡Saludos a todas y todos!", "seconds": 3 },
-    { "type": "wait", "seconds": 1 },
-    { "type": "ask", "question": "¿Pregunta interactiva para el alumnado?", "answer": "respuesta", "correct_say": "¡Exacto!", "incorrect_say": "Respuesta incorrecta." },
-    { "type": "playsound", "name": "pop" }
+  "name": "Mi_Proyecto_Scratch",
+  "category": "videojuego",
+  "backdrop": { "name": "Fondo", "url": "URL_DIRECTA_FONDO" },
+  "variables": { "puntos": 0, "vidas": 3 },
+  "sprites": [
+    {
+      "name": "Jugador",
+      "costumes": [{ "name": "Disfraz", "url": "URL_IMAGEN" }],
+      "x": 0, "y": -120,
+      "scripts": [
+        [ { "type": "when_key", "key": "right arrow" }, { "type": "changex", "dx": 15 }, { "type": "bounce_edge" } ],
+        [ { "type": "when_key", "key": "left arrow" }, { "type": "changex", "dx": -15 }, { "type": "bounce_edge" } ]
+      ]
+    }
   ]
 }
 ```
@@ -119,12 +140,11 @@ REGLAS TÉCNICAS OBLIGATORIAS:
 
 ### 📥 Fase 3: Compilación y Carga en Scratch
 
-1. Abran el archivo **`index.html`** en su navegador web (pueden abrirlo directamente con doble clic o alojarlo en GitHub Pages).
-2. Peguen el JSON generado en el editor de la izquierda.
+1. Abran el compilador web en **[https://nmarafo.github.io/prompt-to-sb3/](https://nmarafo.github.io/prompt-to-sb3/)** o abran `index.html` localmente.
+2. Peguen el JSON generado en el editor.
 3. Hagan clic en el botón **Compilar y Descargar .sb3**.
 4. Abran el editor oficial de Scratch en [scratch.mit.edu/projects/editor](https://scratch.mit.edu/projects/editor) o abran Scratch Desktop.
-5. Vayan al menú superior: **Archivo > Subir desde tu ordenador** y seleccionen el archivo descargado.
-6. ¡El proyecto se cargará con sus disfraces, fondos, diálogos, movimientos y preguntas interactivas listos para ejecutar!
+5. Vayan a **Archivo > Subir desde tu ordenador** y seleccionen el archivo descargado.
 
 ---
 
@@ -136,25 +156,24 @@ prompt-to-sb3/
 ├── README.md                            # Guía completa y documentación del ecosistema
 ├── .gitignore                           # Exclusiones de control de versiones
 ├── index.html                           # Aplicación web interactiva del compilador
-├── style.css                            # Estilos y diseño responsivo institucional
-├── compiler.js                          # Motor de compilación a Scratch 3.0 (.sb3)
+├── style.css                            # Estilos y diseño responsivo
+├── compiler.js                          # Motor universal de compilación Scratch 3.0 (.sb3)
+├── assets_bundle.js                     # Recursos base embebidos para ejecución 100% offline
+├── examples_bundle.js                   # Ejemplos precargados offline
 ├── assets/                              # Recursos base oficiales de Scratch (SVG y WAV)
-│   ├── bcf454acf82e4504149f7ffe07081dbc.svg  # Gato de Scratch (Disfraz 1)
-│   ├── 0fb9be3e8397c983338cb71dc84d0b25.svg  # Gato de Scratch (Disfraz 2)
-│   ├── cd21514d0531fdffb22204e0ec5ed84a.svg  # Fondo blanco neutro
-│   ├── 83a9787d4cb6f3b7632b4ddfebf74367.wav  # Pista de audio Pop
-│   └── 83c36d806dc92327b9e7049a565c6bff.wav  # Pista de audio Miau
 ├── okf/                                 # Especificación Open Knowledge Framework
-│   ├── OKF_PROMPT_TO_SB3.md             # Documento maestro para subir como fuente a NotebookLM
-│   ├── catalogo_bloques_scratch.md      # Referencia técnica de opcodes y bloques Scratch VM
-│   └── guia_prompts_notebooklm.md       # Banco de instrucciones y plantillas pedagógicas
+│   ├── OKF_PROMPT_TO_SB3.md             # Documento maestro universal para NotebookLM
+│   ├── catalogo_bloques_scratch.md      # Catálogo técnico de opcodes Scratch VM
+│   └── guia_prompts_notebooklm.md       # Prompts para videojuegos, visores y animaciones
 ├── schema/                              # Esquemas formales JSON Schema
-│   ├── prompt_to_sb3_schema.json        # Validación de la especificación semántica
+│   ├── prompt_to_sb3_schema.json        # Validación de la especificación semántica universal
 │   └── scratch3_project_schema.json     # Validación de project.json nativo
 └── examples/                            # Proyectos de demostración listos para compilar
-    ├── ejemplo_narrativa_galdos.json    # Benito Pérez Galdós en Gran Canaria (con imagen externa)
-    ├── ejemplo_quiz_ciencias.json       # Cuestionario interactivo sobre el ciclo del agua
-    └── ejemplo_movimiento_basico.json   # Animación y desplazamiento con disfraces nativos
+    ├── ejemplo_videojuego_arcade.json   # Videojuego espacial (Nave, asteroides y puntos)
+    ├── ejemplo_visor_galeria.json       # Visor interactivo de obras y fotografías
+    ├── ejemplo_narrativa_galdos.json    # Historia interactiva (Benito Pérez Galdós)
+    ├── ejemplo_quiz_ciencias.json       # Cuestionario interactivo con variables
+    └── ejemplo_movimiento_basico.json   # Animación elemental y disfraces nativos
 ```
 
 ---

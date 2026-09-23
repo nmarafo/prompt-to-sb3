@@ -1,12 +1,12 @@
 /**
- * prompt-to-sb3 | Scratch 3.0 Compiler Engine
- * Interpreta JSON semántico (NotebookLM / Agentes IA) o project.json nativo y compila a .sb3
+ * prompt-to-sb3 | Scratch 3.0 Universal Compiler Engine
+ * Interpreta especificaciones JSON generales (Videojuegos, Visores, Animaciones, Herramientas) o project.json nativo y compila a .sb3
  * 
  * @author Norberto Martín Afonso (@nmarafo)
  * @license CC BY-SA 4.0
  */
 
-// Utilidad de Consola en Pantalla
+// Consola de Estado
 const Console = {
     el: document.getElementById('console'),
     log(msg, type = 'info') {
@@ -27,7 +27,7 @@ function generateId(prefix = '') {
     return prefix + Math.random().toString(36).substring(2, 12).toUpperCase();
 }
 
-// Plantilla estándar de Scratch 3.0
+// Plantilla base estándar de Scratch 3.0
 const SCRATCH_TEMPLATE = {
     targets: [
         {
@@ -72,13 +72,12 @@ const SCRATCH_TEMPLATE = {
     extensions: [],
     meta: {
         semver: "3.0.0",
-        vm: "0.2.0-prerelease.2023",
-        agent: "prompt-to-sb3 Compiler Tool v2.0 (by @nmarafo)"
+        vm: "0.2.0-universal.2026",
+        agent: "prompt-to-sb3 Universal Compiler v3.0 (by @nmarafo)"
     }
 };
 
-// Activos base embebidos en Base64 para garantizar soporte 100% offline (sin restricciones CORS de file://)
-let EMBEDDED_ASSETS = {};
+let EMBEDDED_ASSETS = window.EMBEDDED_SCRATCH_ASSETS || {};
 
 class ScratchCompiler {
     constructor() {
@@ -103,15 +102,11 @@ class ScratchCompiler {
     }
 
     async getAssetBlob(filename) {
-        // 1. Intentar carga vía fetch local
+        // 1. Intentar carga vía fetch
         try {
             const resp = await fetch(`assets/${filename}`);
-            if (resp.ok) {
-                return await resp.blob();
-            }
-        } catch (e) {
-            // Continuar con fallback embebido
-        }
+            if (resp.ok) return await resp.blob();
+        } catch (e) {}
 
         // 2. Fallback a activos base64 embebidos
         if (EMBEDDED_ASSETS && EMBEDDED_ASSETS[filename]) {
@@ -124,17 +119,14 @@ class ScratchCompiler {
     }
 
     async fetchExternalImage(url) {
-        Console.log(`Descargando activo externo: ${url}...`, 'info');
-        
-        // Intentar descarga directa
+        Console.log(`Descargando activo: ${url}...`, 'info');
         try {
             const resp = await fetch(url, { mode: 'cors' });
             if (resp.ok) return await resp.blob();
         } catch (err) {
-            Console.log(`Aviso de CORS al descargar directamente: ${err.message}. Intentando vía proxy público...`, 'warning');
+            Console.log(`Intento directo no disponible (${err.message}). Conectando vía proxy CORS...`, 'warning');
         }
 
-        // Intento secundario con proxy CORS para Wikimedia Commons u otros repositorios abiertos
         try {
             const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
             const respProxy = await fetch(proxyUrl);
@@ -143,13 +135,13 @@ class ScratchCompiler {
                 return await respProxy.blob();
             }
         } catch (err2) {
-            Console.log(`No se pudo descargar la imagen externa. Se aplicará el disfraz predeterminado.`, 'warning');
+            Console.log(`No se pudo descargar ${url}. Se empleará el activo predeterminado.`, 'warning');
         }
 
         return null;
     }
 
-    mapActionToBlock(action, nextId, parentId, variablesMap) {
+    buildActionBlock(action, nextId, parentId, variablesMap, blocksCollector) {
         const id = generateId('b_');
         let block = {
             opcode: "",
@@ -161,13 +153,48 @@ class ScratchCompiler {
             topLevel: !parentId
         };
 
-        switch (action.type) {
+        const type = (action.type || '').toLowerCase();
+
+        switch (type) {
+            // === EVENTOS ===
             case 'start':
+            case 'flag':
                 block.opcode = "event_whenflagclicked";
                 block.x = action.x || 100;
                 block.y = action.y || 100;
                 break;
 
+            case 'when_key':
+            case 'key':
+                block.opcode = "event_whenkeypressed";
+                block.fields.KEY_OPTION = [String(action.key || "space"), null];
+                block.x = action.x || 100;
+                block.y = action.y || 100;
+                break;
+
+            case 'when_clicked':
+            case 'click':
+                block.opcode = "event_whenthisspriteclicked";
+                block.x = action.x || 100;
+                block.y = action.y || 100;
+                break;
+
+            case 'broadcast':
+                block.opcode = "event_broadcast";
+                const bMsg = String(action.message || "mensaje1");
+                block.inputs.BROADCAST_INPUT = [1, [11, bMsg, generateId('bc_')]];
+                break;
+
+            case 'when_receive':
+            case 'receive':
+                block.opcode = "event_whenbroadcastreceived";
+                const rMsg = String(action.message || "mensaje1");
+                block.fields.BROADCAST_OPTION = [rMsg, generateId('bc_')];
+                block.x = action.x || 100;
+                block.y = action.y || 100;
+                break;
+
+            // === MOVIMIENTO (JUEGOS Y VISORES) ===
             case 'move':
                 if (action.x !== undefined || action.y !== undefined) {
                     block.opcode = "motion_gotoxy";
@@ -179,6 +206,46 @@ class ScratchCompiler {
                 }
                 break;
 
+            case 'changex':
+                block.opcode = "motion_changexby";
+                block.inputs.DX = [1, [4, String(action.dx !== undefined ? action.dx : (action.by || 10))]];
+                break;
+
+            case 'changey':
+                block.opcode = "motion_changeyby";
+                block.inputs.DY = [1, [4, String(action.dy !== undefined ? action.dy : (action.by || 10))]];
+                break;
+
+            case 'setx':
+                block.opcode = "motion_setx";
+                block.inputs.X = [1, [4, String(action.x || 0)]];
+                break;
+
+            case 'sety':
+                block.opcode = "motion_sety";
+                block.inputs.Y = [1, [4, String(action.y || 0)]];
+                break;
+
+            case 'turn_right':
+                block.opcode = "motion_turnright";
+                block.inputs.DEGREES = [1, [4, String(action.degrees || 15)]];
+                break;
+
+            case 'turn_left':
+                block.opcode = "motion_turnleft";
+                block.inputs.DEGREES = [1, [4, String(action.degrees || 15)]];
+                break;
+
+            case 'point_direction':
+                block.opcode = "motion_pointindirection";
+                block.inputs.DIRECTION = [1, [8, String(action.direction !== undefined ? action.direction : 90)]];
+                break;
+
+            case 'bounce_edge':
+            case 'bounce':
+                block.opcode = "motion_ifonedgebounce";
+                break;
+
             case 'glide':
                 block.opcode = "motion_glidesecstoxy";
                 block.inputs.SECS = [1, [4, String(action.seconds || action.duration || 1)]];
@@ -186,6 +253,7 @@ class ScratchCompiler {
                 block.inputs.Y = [1, [4, String(action.y || 0)]];
                 break;
 
+            // === APARIENCIA (VISORES, ANIMACIONES Y JUEGOS) ===
             case 'say':
                 if (action.seconds || action.duration) {
                     block.opcode = "looks_sayforsecs";
@@ -208,9 +276,12 @@ class ScratchCompiler {
                 }
                 break;
 
-            case 'wait':
-                block.opcode = "control_wait";
-                block.inputs.DURATION = [1, [5, String(action.seconds || action.duration || 1)]];
+            case 'show':
+                block.opcode = "looks_show";
+                break;
+
+            case 'hide':
+                block.opcode = "looks_hide";
                 break;
 
             case 'costume':
@@ -218,16 +289,70 @@ class ScratchCompiler {
                 block.inputs.COSTUME = [1, [10, String(action.name || "costume1")]];
                 break;
 
+            case 'next_costume':
+                block.opcode = "looks_nextcostume";
+                break;
+
             case 'backdrop':
                 block.opcode = "looks_switchbackdropto";
                 block.inputs.BACKDROP = [1, [10, String(action.name || "backdrop1")]];
                 break;
 
+            case 'next_backdrop':
+                block.opcode = "looks_nextbackdrop";
+                break;
+
+            case 'set_size':
+                block.opcode = "looks_setsizeto";
+                block.inputs.SIZE = [1, [4, String(action.size || 100)]];
+                break;
+
+            case 'change_size':
+                block.opcode = "looks_changesizeby";
+                block.inputs.CHANGE = [1, [4, String(action.by || 10)]];
+                break;
+
+            // === CONTROL (BUCLES DE JUEGO, TEMPORIZADORES Y CONDICIONALES) ===
+            case 'wait':
+                block.opcode = "control_wait";
+                block.inputs.DURATION = [1, [5, String(action.seconds || action.duration || 1)]];
+                break;
+
+            case 'forever':
+                block.opcode = "control_forever";
+                if (action.actions && Array.isArray(action.actions)) {
+                    const subFirstId = this.compileActionsList(action.actions, id, variablesMap, blocksCollector);
+                    if (subFirstId) {
+                        block.inputs.SUBSTACK = [2, subFirstId];
+                    }
+                }
+                break;
+
+            case 'repeat':
+                block.opcode = "control_repeat";
+                block.inputs.TIMES = [1, [6, String(action.times || 10)]];
+                if (action.actions && Array.isArray(action.actions)) {
+                    const subFirstId = this.compileActionsList(action.actions, id, variablesMap, blocksCollector);
+                    if (subFirstId) {
+                        block.inputs.SUBSTACK = [2, subFirstId];
+                    }
+                }
+                break;
+
+            // === SENSORES Y PREGUNTAS ===
+            case 'ask':
+                block.opcode = "sensing_askandwait";
+                block.inputs.QUESTION = [1, [10, String(action.question || "¿Cuál es su respuesta?")]];
+                break;
+
+            // === SONIDOS ===
             case 'playsound':
+            case 'sound':
                 block.opcode = "sound_playuntildone";
                 block.inputs.SOUND_MENU = [1, [10, String(action.name || "pop")]];
                 break;
 
+            // === VARIABLES Y MARCADORES ===
             case 'set_var':
                 block.opcode = "data_setvariableto";
                 const varName = action.name || "puntos";
@@ -244,12 +369,6 @@ class ScratchCompiler {
                 block.inputs.VALUE = [1, [4, String(action.by !== undefined ? action.by : 1)]];
                 break;
 
-            case 'ask':
-                // Genera la pregunta interactiva con retroalimentación inmediata
-                block.opcode = "sensing_askandwait";
-                block.inputs.QUESTION = [1, [10, String(action.question || "¿Cuál es su respuesta?")]];
-                break;
-
             default:
                 Console.log(`Acción no reconocida omitida: ${action.type}`, 'warning');
                 return null;
@@ -258,92 +377,33 @@ class ScratchCompiler {
         return { id, block };
     }
 
-    async compileSemanticJson(inputJson) {
-        Console.log("Transformando JSON semántico a estructura Scratch 3.0...", 'info');
-        const project = JSON.parse(JSON.stringify(SCRATCH_TEMPLATE));
-        this.zip = new JSZip();
+    compileActionsList(actionsList, parentId, variablesMap, blocksCollector) {
+        if (!actionsList || !Array.isArray(actionsList) || actionsList.length === 0) return null;
 
-        // 1. Configurar variables del proyecto
-        const variablesMap = {};
-        if (inputJson.variables && typeof inputJson.variables === 'object') {
-            for (const [vName, vVal] of Object.entries(inputJson.variables)) {
-                const vId = generateId('var_');
-                variablesMap[vName] = vId;
-                project.targets[0].variables[vId] = [vName, vVal];
-            }
-        }
+        let lastId = null;
+        const reversed = [...actionsList].reverse();
 
-        // 2. Configurar Fondo del Escenario (Stage Backdrop)
-        if (inputJson.backdrop && inputJson.backdrop.url) {
-            const backdropBlob = await this.fetchExternalImage(inputJson.backdrop.url);
-            if (backdropBlob) {
-                const assetId = generateId('bd_').toLowerCase();
-                const ext = inputJson.backdrop.url.split('.').pop().split('?')[0] || 'jpg';
-                const filename = `${assetId}.${ext}`;
-                this.zip.file(filename, backdropBlob);
-                project.targets[0].costumes[0] = {
-                    name: inputJson.backdrop.name || "FondoPersonalizado",
-                    dataFormat: ext,
-                    assetId: assetId,
-                    md5ext: filename,
-                    rotationCenterX: 240,
-                    rotationCenterY: 180
-                };
-                Console.log(`Fondo personalizado añadido: ${filename}`, 'success');
-            }
-        }
+        for (let i = 0; i < reversed.length; i++) {
+            const act = reversed[i];
+            const isFirstInStack = (i === reversed.length - 1);
+            const currentParentId = isFirstInStack ? parentId : null;
 
-        // Incluir activo base de fondo si no se ha reemplazado o como respaldo
-        const baseStageBg = await this.getAssetBlob('cd21514d0531fdffb22204e0ec5ed84a.svg');
-        if (baseStageBg && !this.zip.file('cd21514d0531fdffb22204e0ec5ed84a.svg')) {
-            this.zip.file('cd21514d0531fdffb22204e0ec5ed84a.svg', baseStageBg);
-        }
-
-        // 3. Crear el Sprite Principal
-        const sprite = {
-            isStage: false,
-            name: "PersonajePrincipal",
-            variables: {},
-            lists: {},
-            broadcasts: {},
-            blocks: {},
-            comments: {},
-            currentCostume: 0,
-            costumes: [],
-            sounds: [
-                {
-                    name: "pop",
-                    assetId: "83a9787d4cb6f3b7632b4ddfebf74367",
-                    dataFormat: "wav",
-                    format: "",
-                    rate: 48000,
-                    sampleCount: 1123,
-                    md5ext: "83a9787d4cb6f3b7632b4ddfebf74367.wav"
-                },
-                {
-                    name: "meow",
-                    assetId: "83c36d806dc92327b9e7049a565c6bff",
-                    dataFormat: "wav",
-                    format: "",
-                    rate: 48000,
-                    sampleCount: 40681,
-                    md5ext: "83c36d806dc92327b9e7049a565c6bff.wav"
+            const res = this.buildActionBlock(act, lastId, currentParentId, variablesMap, blocksCollector);
+            if (res) {
+                blocksCollector[res.id] = res.block;
+                if (lastId && blocksCollector[lastId]) {
+                    blocksCollector[lastId].parent = res.id;
                 }
-            ],
-            volume: 100,
-            layerOrder: 1,
-            visible: true,
-            x: 0,
-            y: 0,
-            size: 100,
-            direction: 90,
-            draggable: false,
-            rotationStyle: "all around"
-        };
+                lastId = res.id;
+            }
+        }
 
-        // Procesar Disfraces del Sprite
-        if (inputJson.costumes && Array.isArray(inputJson.costumes)) {
-            for (const cost of inputJson.costumes) {
+        return lastId; // Retorna el primer bloque de la pila
+    }
+
+    async processSpriteCostumes(sprite, costumesData) {
+        if (costumesData && Array.isArray(costumesData)) {
+            for (const cost of costumesData) {
                 let costName = typeof cost === 'string' ? cost : (cost.name || "Disfraz");
                 let blob = null;
                 let assetId = "";
@@ -366,15 +426,15 @@ class ScratchCompiler {
                         dataFormat: filename.split('.').pop(),
                         assetId: assetId,
                         md5ext: filename,
-                        rotationCenterX: 50,
+                        rotationCenterX: 48,
                         rotationCenterY: 50
                     });
-                    Console.log(`Disfraz externo incorporado: ${costName}`, 'success');
+                    Console.log(`Disfraz incorporado a [${sprite.name}]: ${costName}`, 'success');
                 }
             }
         }
 
-        // Si no se incluyeron disfraces externos válidos, usar el gato clásico de Scratch
+        // Si no tiene disfraces válidos, aplicar disfraces clásicos
         if (sprite.costumes.length === 0) {
             const cat1Blob = await this.getAssetBlob('bcf454acf82e4504149f7ffe07081dbc.svg');
             const cat2Blob = await this.getAssetBlob('0fb9be3e8397c983338cb71dc84d0b25.svg');
@@ -391,7 +451,6 @@ class ScratchCompiler {
                     rotationCenterY: 50
                 });
             }
-
             if (cat2Blob) {
                 this.zip.file('0fb9be3e8397c983338cb71dc84d0b25.svg', cat2Blob);
                 sprite.costumes.push({
@@ -405,49 +464,158 @@ class ScratchCompiler {
                 });
             }
         }
+    }
 
-        // Añadir pistas de audio básicas al ZIP
+    async compileGeneralJson(inputJson) {
+        Console.log("Procesando especificación JSON universal para Scratch 3.0...", 'info');
+        const project = JSON.parse(JSON.stringify(SCRATCH_TEMPLATE));
+        this.zip = new JSZip();
+
+        // 1. Configurar variables (puntos, vidas, nivel, indice, etc.)
+        const variablesMap = {};
+        if (inputJson.variables && typeof inputJson.variables === 'object') {
+            for (const [vName, vVal] of Object.entries(inputJson.variables)) {
+                const vId = generateId('var_');
+                variablesMap[vName] = vId;
+                project.targets[0].variables[vId] = [vName, vVal];
+            }
+        }
+
+        // 2. Fondos del Escenario (Stage Backdrops)
+        if (inputJson.backdrop) {
+            const backdropsList = Array.isArray(inputJson.backdrop) ? inputJson.backdrop : [inputJson.backdrop];
+            let isFirst = true;
+
+            for (const bd of backdropsList) {
+                if (bd.url) {
+                    const bdBlob = await this.fetchExternalImage(bd.url);
+                    if (bdBlob) {
+                        const assetId = generateId('bd_').toLowerCase();
+                        const ext = bd.url.split('.').pop().split('?')[0] || 'jpg';
+                        const filename = `${assetId}.${ext}`;
+                        this.zip.file(filename, bdBlob);
+
+                        const bdObj = {
+                            name: bd.name || "FondoPersonalizado",
+                            dataFormat: ext,
+                            assetId: assetId,
+                            md5ext: filename,
+                            rotationCenterX: 240,
+                            rotationCenterY: 180
+                        };
+
+                        if (isFirst) {
+                            project.targets[0].costumes[0] = bdObj;
+                            isFirst = false;
+                        } else {
+                            project.targets[0].costumes.push(bdObj);
+                        }
+                        Console.log(`Fondo añadido: ${bdObj.name}`, 'success');
+                    }
+                }
+            }
+        }
+
+        // Activo neutro de respaldo para el escenario
+        const baseBg = await this.getAssetBlob('cd21514d0531fdffb22204e0ec5ed84a.svg');
+        if (baseBg && !this.zip.file('cd21514d0531fdffb22204e0ec5ed84a.svg')) {
+            this.zip.file('cd21514d0531fdffb22204e0ec5ed84a.svg', baseBg);
+        }
+
+        // 3. Procesar Sprites (Soporte Multi-Sprite o Sprite Único)
+        let spritesDefs = [];
+        if (inputJson.sprites && Array.isArray(inputJson.sprites)) {
+            spritesDefs = inputJson.sprites;
+        } else {
+            // Modo Sprite Único / Compatibilidad directa
+            spritesDefs = [{
+                name: inputJson.sprite_name || "ObjetoPrincipal",
+                costumes: inputJson.costumes,
+                actions: inputJson.actions,
+                scripts: inputJson.scripts,
+                x: inputJson.x || 0,
+                y: inputJson.y || 0
+            }];
+        }
+
+        let layer = 1;
+        for (const sDef of spritesDefs) {
+            const sprite = {
+                isStage: false,
+                name: sDef.name || `Objeto${layer}`,
+                variables: {},
+                lists: {},
+                broadcasts: {},
+                blocks: {},
+                comments: {},
+                currentCostume: 0,
+                costumes: [],
+                sounds: [
+                    {
+                        name: "pop",
+                        assetId: "83a9787d4cb6f3b7632b4ddfebf74367",
+                        dataFormat: "wav",
+                        format: "",
+                        rate: 48000,
+                        sampleCount: 1123,
+                        md5ext: "83a9787d4cb6f3b7632b4ddfebf74367.wav"
+                    },
+                    {
+                        name: "meow",
+                        assetId: "83c36d806dc92327b9e7049a565c6bff",
+                        dataFormat: "wav",
+                        format: "",
+                        rate: 48000,
+                        sampleCount: 40681,
+                        md5ext: "83c36d806dc92327b9e7049a565c6bff.wav"
+                    }
+                ],
+                volume: 100,
+                layerOrder: layer++,
+                visible: sDef.visible !== false,
+                x: sDef.x || 0,
+                y: sDef.y || 0,
+                size: sDef.size || 100,
+                direction: sDef.direction !== undefined ? sDef.direction : 90,
+                draggable: false,
+                rotationStyle: sDef.rotationStyle || "all around"
+            };
+
+            await this.processSpriteCostumes(sprite, sDef.costumes);
+
+            // Mapeo de Bloques: Múltiples scripts independientes o array de acciones
+            if (sDef.scripts && Array.isArray(sDef.scripts)) {
+                let scriptOffsetY = 100;
+                for (const script of sDef.scripts) {
+                    const acts = Array.isArray(script) ? script : (script.actions || []);
+                    if (acts.length > 0) {
+                        const firstAct = acts[0];
+                        if (firstAct && firstAct.x === undefined) firstAct.x = 100;
+                        if (firstAct && firstAct.y === undefined) firstAct.y = scriptOffsetY;
+                        this.compileActionsList(acts, null, variablesMap, sprite.blocks);
+                        scriptOffsetY += 160;
+                    }
+                }
+            } else if (sDef.actions && Array.isArray(sDef.actions)) {
+                this.compileActionsList(sDef.actions, null, variablesMap, sprite.blocks);
+            }
+
+            project.targets.push(sprite);
+        }
+
+        // Pistas de audio base al ZIP
         const popBlob = await this.getAssetBlob('83a9787d4cb6f3b7632b4ddfebf74367.wav');
         if (popBlob) this.zip.file('83a9787d4cb6f3b7632b4ddfebf74367.wav', popBlob);
 
         const meowBlob = await this.getAssetBlob('83c36d806dc92327b9e7049a565c6bff.wav');
         if (meowBlob) this.zip.file('83c36d806dc92327b9e7049a565c6bff.wav', meowBlob);
 
-        // 4. Mapear y encadenar acciones a bloques Scratch
-        if (inputJson.actions && Array.isArray(inputJson.actions)) {
-            // Expandir acciones compuestas (como 'ask' con retroalimentación)
-            const expandedActions = [];
-            for (const act of inputJson.actions) {
-                if (act.type === 'ask' && (act.correct_say || act.incorrect_say)) {
-                    expandedActions.push({ type: 'ask', question: act.question });
-                    if (act.correct_say) {
-                        expandedActions.push({ type: 'say', text: act.correct_say, seconds: 3 });
-                    }
-                } else {
-                    expandedActions.push(act);
-                }
-            }
-
-            let lastId = null;
-            const reversedActions = [...expandedActions].reverse();
-
-            for (const action of reversedActions) {
-                const res = this.mapActionToBlock(action, lastId, null, variablesMap);
-                if (res) {
-                    sprite.blocks[res.id] = res.block;
-                    if (lastId) sprite.blocks[lastId].parent = res.id;
-                    lastId = res.id;
-                }
-            }
-        }
-
-        project.targets.push(sprite);
         return project;
     }
 
     async generateSb3(jsonString) {
         Console.clear();
-        Console.log("Iniciando proceso de compilación para Scratch 3.0...", 'info');
+        Console.log("Iniciando compilador de proyectos Scratch 3.0...", 'info');
 
         let parsed;
         try {
@@ -460,28 +628,25 @@ class ScratchCompiler {
         let projectJson;
         this.zip = new JSZip();
 
-        // Detección automática del tipo de JSON
         if (parsed.targets && Array.isArray(parsed.targets)) {
-            Console.log("Detectado formato nativo de Scratch 3.0 (project.json). Empaquetando activos base...", 'info');
+            Console.log("Detectado formato nativo de Scratch 3.0 (project.json). Empaquetando recursos...", 'info');
             projectJson = parsed;
 
-            // Incluir todos los recursos base de Scratch
             for (const assetName of this.baseAssetNames) {
                 const blob = await this.getAssetBlob(assetName);
                 if (blob) this.zip.file(assetName, blob);
             }
-        } else if (parsed.actions && Array.isArray(parsed.actions)) {
-            Console.log("Detectado formato semántico OKF (prompt-to-sb3).", 'info');
-            projectJson = await this.compileSemanticJson(parsed);
+        } else if (parsed.actions || parsed.sprites) {
+            Console.log(`Compilando proyecto [${parsed.type || parsed.category || 'general'}]...`, 'info');
+            projectJson = await this.compileGeneralJson(parsed);
         } else {
-            throw new Error("El JSON proporcionado no cumple con la estructura de prompt-to-sb3 ni con el formato de Scratch 3.0.");
+            throw new Error("El JSON no contiene 'actions', 'sprites' ni 'targets'. Verifique la estructura.");
         }
 
-        // Escribir el project.json compilado
         const jsonContent = JSON.stringify(projectJson, null, 2);
         this.zip.file("project.json", jsonContent);
 
-        Console.log("Generando contenedor ZIP comprimido (.sb3)...", 'info');
+        Console.log("Comprimiendo contenedor .sb3 (ZIP)...", 'info');
         const zipBlob = await this.zip.generateAsync({
             type: "blob",
             compression: "DEFLATE",
@@ -491,7 +656,6 @@ class ScratchCompiler {
         const projectName = (parsed.name || "proyecto_scratch").replace(/[^a-zA-Z0-9_-]/g, '_');
         const filename = `${projectName}.sb3`;
 
-        // Descarga automática en el navegador
         const downloadUrl = URL.createObjectURL(zipBlob);
         const a = document.createElement('a');
         a.href = downloadUrl;
@@ -501,8 +665,8 @@ class ScratchCompiler {
         document.body.removeChild(a);
         URL.revokeObjectURL(downloadUrl);
 
-        Console.log(`¡Proyecto compilado y descargado con éxito!: <strong>${filename}</strong>`, 'success');
-        Console.log("Instrucciones para abrir: Vaya a <a href='https://scratch.mit.edu/projects/editor' target='_blank' style='color:#38bdf8;'>scratch.mit.edu</a>, haga clic en <em>Archivo > Subir desde tu ordenador</em> y seleccione su archivo.", 'info');
+        Console.log(`¡Archivo descargado con éxito!: <strong>${filename}</strong>`, 'success');
+        Console.log("Para ejecutar: Acceda a <a href='https://scratch.mit.edu/projects/editor' target='_blank' style='color:#38bdf8;'>scratch.mit.edu</a> > <em>Archivo > Subir desde tu ordenador</em>.", 'info');
     }
 
     async inspectSb3(file) {
@@ -519,15 +683,14 @@ class ScratchCompiler {
             const data = JSON.parse(jsonText);
 
             Console.log(`Versión semver de Scratch: ${data.meta?.semver || '3.0.0'}`, 'info');
-            Console.log(`Total de targets: ${data.targets?.length || 0}`, 'info');
+            Console.log(`Total de elementos (Targets): ${data.targets?.length || 0}`, 'info');
 
             data.targets?.forEach((t, i) => {
-                Console.log(`Target ${i}: ${t.name} (${t.isStage ? 'Escenario' : 'Sprite'}) - Bloques: ${Object.keys(t.blocks || {}).length}, Disfraces: ${t.costumes?.length || 0}`, 'info');
+                Console.log(`- Target ${i}: ${t.name} (${t.isStage ? 'Escenario' : 'Sprite'}) | Bloques: ${Object.keys(t.blocks || {}).length} | Disfraces: ${t.costumes?.length || 0}`, 'info');
             });
 
-            // Mostrar el JSON en el editor
             document.getElementById('json-input').value = JSON.stringify(data, null, 2);
-            Console.log("Estructura de project.json cargada en el editor.", 'success');
+            Console.log("project.json cargado en el editor.", 'success');
         } catch (e) {
             Console.log(`Error al inspeccionar el archivo: ${e.message}`, 'error');
         }
@@ -537,10 +700,7 @@ class ScratchCompiler {
 // Inicialización de la aplicación
 const compiler = new ScratchCompiler();
 
-// Activos embebidos para compatibilidad offline inmediata
-EMBEDDED_ASSETS = window.EMBEDDED_SCRATCH_ASSETS || {};
-
-// Event Listeners de la Interfaz
+// Listeners
 document.getElementById('compile-btn')?.addEventListener('click', async () => {
     const input = document.getElementById('json-input').value.trim();
     if (!input) {
@@ -554,7 +714,6 @@ document.getElementById('compile-btn')?.addEventListener('click', async () => {
     }
 });
 
-// Formatear JSON
 document.getElementById('format-btn')?.addEventListener('click', () => {
     const input = document.getElementById('json-input').value.trim();
     if (!input) return;
@@ -563,29 +722,25 @@ document.getElementById('format-btn')?.addEventListener('click', () => {
         document.getElementById('json-input').value = JSON.stringify(obj, null, 2);
         Console.log("JSON formateado correctamente.", "success");
     } catch (e) {
-        Console.log("No se pudo formatear: el texto actual contiene errores de sintaxis JSON.", "error");
+        Console.log("No se pudo formatear: el texto contiene errores de sintaxis JSON.", "error");
     }
 });
 
-// Limpiar editor
 document.getElementById('clear-btn')?.addEventListener('click', () => {
     document.getElementById('json-input').value = '';
     Console.log("Editor limpiado.", "info");
 });
 
-// Selector de Ejemplos
 document.getElementById('example-select')?.addEventListener('change', async (e) => {
     const val = e.target.value;
     if (!val) return;
     
-    // 1. Intentar cargar desde ejemplos embebidos (instantáneo y sin restricciones CORS)
     if (window.EMBEDDED_EXAMPLES && window.EMBEDDED_EXAMPLES[val]) {
         document.getElementById('json-input').value = JSON.stringify(window.EMBEDDED_EXAMPLES[val], null, 2);
         Console.log(`Ejemplo cargado: ${val}`, 'success');
         return;
     }
 
-    // 2. Fallback a fetch
     try {
         const resp = await fetch(`examples/${val}`);
         if (resp.ok) {
@@ -598,7 +753,6 @@ document.getElementById('example-select')?.addEventListener('change', async (e) 
     }
 });
 
-// Función de Copia Rápida al Portapapeles
 function copyText(elementId, btn) {
     const textEl = document.getElementById(elementId);
     if (!textEl) return;
@@ -613,12 +767,11 @@ function copyText(elementId, btn) {
             if (window.lucide) lucide.createIcons();
         }, 2000);
     }).catch(err => {
-        Console.log("No se pudo copiar automáticamente: " + err, "error");
+        Console.log("No se pudo copiar: " + err, "error");
     });
 }
 window.copyText = copyText;
 
-// Conectar botones rápidos de la cabecera
 document.getElementById('copy-assets-prompt-quick')?.addEventListener('click', function() {
     copyText('assets-prompt-text', this);
 });
@@ -627,7 +780,6 @@ document.getElementById('copy-master-quick')?.addEventListener('click', function
     copyText('master-prompt-text', this);
 });
 
-// Gestión del Modal de Guía
 const modal = document.getElementById('guide-modal');
 const openBtn = document.getElementById('open-guide');
 const closeBtn = document.getElementById('close-guide');
@@ -636,7 +788,6 @@ if (openBtn && modal) openBtn.onclick = () => modal.style.display = 'flex';
 if (closeBtn && modal) closeBtn.onclick = () => modal.style.display = 'none';
 window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
-// Carga de archivo .sb3 para inspección (Drag & Drop e Input)
 const dropArea = document.getElementById('drop-area');
 const fileInput = document.getElementById('file-input');
 

@@ -22,8 +22,8 @@
                     <i data-lucide="blocks" color="white" size="24"></i>
                 </div>
                 <div class="logo-text">
-                    <h1>prompt-to-sb3 <span class="badge-tag">OKF Scratch</span></h1>
-                    <p>Compilador Didáctico de Proyectos Scratch con Inteligencia Artificial</p>
+                    <h1>prompt-to-sb3 <span class="badge-tag">OKF Universal</span></h1>
+                    <p>Compilador de Scratch 3.0 para Videojuegos, Visores, Animaciones y Apps</p>
                 </div>
             </div>
 
@@ -38,13 +38,15 @@
                 </button>
                 <button class="btn-secondary" id="open-guide">
                     <i data-lucide="book-open" size="16"></i>
-                    Guía NotebookLM
+                    Guía y Prompts
                 </button>
                 <select class="select-custom" id="example-select" title="Seleccionar proyecto de ejemplo">
                     <option value="">📂 Cargar Ejemplo...</option>
-                    <option value="ejemplo_narrativa_galdos.json">📜 Galdós en Gran Canaria (Narrativa)</option>
-                    <option value="ejemplo_quiz_ciencias.json">🧪 Quiz Ciclo del Agua (Preguntas)</option>
-                    <option value="ejemplo_movimiento_basico.json">🐱 Movimiento y Animación Básica</option>
+                    <option value="ejemplo_videojuego_arcade.json">🎮 Videojuego Arcade (Nave y Asteroides)</option>
+                    <option value="ejemplo_visor_galeria.json">🖼️ Visor Interactivo (Galería Espacial)</option>
+                    <option value="ejemplo_narrativa_galdos.json">📜 Narrativa Histórica (Galdós)</option>
+                    <option value="ejemplo_quiz_ciencias.json">🧪 Quiz Interactivo (Ciclo del Agua)</option>
+                    <option value="ejemplo_movimiento_basico.json">🐱 Animación Básica (Gato)</option>
                 </select>
             </div>
         </header>
@@ -146,36 +148,38 @@ Ejemplo mínimo:
                 <!-- Fase 0: Búsqueda de Assets en la Web -->
                 <div class="guide-step">
                     <div class="step-badge">
-                        <i data-lucide="search" size="14"></i> Fase 0: Búsqueda de Fuentes y Assets en la Web
+                        <i data-lucide="search" size="14"></i> Fase 0: Búsqueda de Assets en la Web (NotebookLM)
                     </div>
-                    <h3>Localización de Imágenes de Acceso Abierto en Wikimedia Commons</h3>
-                    <p>En su cuaderno de <strong>Google NotebookLM</strong>, acceda a <em>+ Añadir fuentes > Buscar fuentes en la Web</em> y pegue la siguiente instrucción para obtener enlaces directos a imágenes:</p>
+                    <h3>Localización de Recursos Multimedia en Wikimedia Commons</h3>
+                    <p>En <strong>Google NotebookLM</strong>, abra <em>+ Añadir fuentes > Buscar fuentes en la Web</em> y pegue este prompt para obtener enlaces directos a imágenes (.png con transparencia, .svg o fotos .jpg):</p>
                     <div class="code-box">
-                        <pre id="assets-prompt-text">Busca imágenes y recursos visuales en Wikimedia Commons y repositorios de dominio público sobre [TEMA O PERSONAJES, ej: Benito Pérez Galdós / Sistema Solar / Ecosistemas Canarios].
-Requisitos:
-1. Necesito URLs directas y completas a imágenes (.svg, .png o .jpg), preferiblemente alojadas en upload.wikimedia.org.
-2. Identifica un retrato o figura en plano recortado para el personaje principal (Sprite).
-3. Identifica una imagen panorámica o escena de fondo para el escenario (Backdrop).
-4. Presenta el resultado en una tabla con tres columnas: Elemento (Personaje/Fondo), Descripción pedagógica y URL directa de la imagen.</pre>
+                        <pre id="assets-prompt-text">Busca imágenes y recursos visuales en Wikimedia Commons y repositorios de acceso público sobre [INTRODUZCA TEMA, ej: Naves espaciales y asteroides / Obras de arte / Paisajes / Personajes].
+Requisitos técnicos:
+1. Necesito URLs directas a archivos de imagen (.png con fondo transparente o .svg, o fotografías .jpg panorámicas), alojadas preferiblemente en upload.wikimedia.org.
+2. Identifica:
+   - Imágenes para personajes, objetos o botones (Sprites).
+   - Imágenes panorámicas para escenarios o diapositivas (Backdrops).
+3. Presenta los resultados en una tabla clara: Elemento, Uso sugerido en Scratch y URL directa de la imagen.</pre>
                     </div>
                     <button class="btn-copy" onclick="copyText('assets-prompt-text', this)">
                         <i data-lucide="copy" size="14"></i> Copiar Prompt de Búsqueda Web
                     </button>
                 </div>
 
-                <!-- Fase 1: Guion Pedagógico -->
+                <!-- Fase 1: Diseño del Proyecto -->
                 <div class="guide-step">
                     <div class="step-badge">
-                        <i data-lucide="file-text" size="14"></i> Fase 1: Guion Didáctico e Instruccional
+                        <i data-lucide="layout" size="14"></i> Fase 1: Diseño de Mecánicas (Videojuego, Visor o App)
                     </div>
-                    <h3>Estructuración de la Secuencia Didáctica</h3>
-                    <p>Pegue esta instrucción en el chat de consultas de NotebookLM para estructurar la situación de aprendizaje o narrativa:</p>
+                    <h3>Estructuración de la Experiencia Interactiva</h3>
+                    <p>Pegue esta instrucción en el chat de NotebookLM para definir las reglas y flujo del proyecto:</p>
                     <div class="code-box">
-                        <pre id="research-prompt-text">Actúa como un Asesor Pedagógico experto en Tecnología Educativa. A partir de las fuentes analizadas en este cuaderno, diseña la estructura completa de un proyecto interactivo en Scratch 3.0 sobre este tema.
-Estructura la propuesta en:
-1. Justificación Curricular y Saberes Básicos.
-2. Personajes participantes y fondo de escenario (vinculando las URLs obtenidas en la Fase 0).
-3. Secuencia en al menos 15 intervenciones (diálogos, desplazamientos y al menos 2 preguntas interactivas tipo quiz con retroalimentación para el alumnado).</pre>
+                        <pre id="research-prompt-text">Actúa como un Diseñador y Programador de Software Interactivo en Scratch 3.0.
+A partir de las fuentes y elementos gráficos de este cuaderno, diseña la arquitectura de un proyecto [TIPO: videojuego / visor interactivo / simulación]:
+1. Objetivo y reglas de la experiencia.
+2. Objetos participantes (Sprites) y fondos (Backdrops) vinculando las URLs obtenidas en la Fase 0.
+3. Controles de usuario (teclas de flechas, espacio o clics con el ratón).
+4. Variables de estado ('puntos', 'vidas', 'diapositiva' o 'tiempo').</pre>
                     </div>
                     <button class="btn-copy" onclick="copyText('research-prompt-text', this)">
                         <i data-lucide="copy" size="14"></i> Copiar Prompt Fase 1
@@ -185,30 +189,33 @@ Estructura la propuesta en:
                 <!-- Fase 2: Master Prompt JSON -->
                 <div class="guide-step">
                     <div class="step-badge">
-                        <i data-lucide="cpu" size="14"></i> Fase 2: Generación del JSON para el Compilador
+                        <i data-lucide="cpu" size="14"></i> Fase 2: Generación del JSON Universal
                     </div>
-                    <h3>Master Prompt de Conversión Determinista</h3>
-                    <p>Solicite a NotebookLM la entrega del JSON listo para copiar en esta herramienta:</p>
+                    <h3>Master Prompt para Videojuegos, Visores y Apps</h3>
+                    <p>Solicite a NotebookLM la conversión a JSON listo para el compilador:</p>
                     <div class="code-box">
-                        <pre id="master-prompt-text">Basándote en el guion didáctico y las fuentes del cuaderno, genera el código JSON para la herramienta Scratch Compiler Tool (prompt-to-sb3).
+                        <pre id="master-prompt-text">Basándote en el diseño anterior, genera el código JSON universal para la herramienta Scratch Compiler Tool (prompt-to-sb3).
 
 REGLAS TÉCNICAS OBLIGATORIAS:
-1. Devuelve ÚNICAMENTE el bloque de código JSON crudo (sin texto explicativo previo ni posterior).
-2. Utiliza exactamente las URLs directas identificadas en la Fase 0 para 'backdrop' y 'costumes'.
-3. Formato requerido:
+1. Devuelve ÚNICAMENTE el bloque JSON crudo (sin texto antes ni después).
+2. Para videojuegos o proyectos multi-objeto, utiliza el array 'sprites' con sus 'scripts' o 'actions'.
+3. Para visores o galerías, puedes usar un array en 'backdrop' con múltiples imágenes y la acción 'next_backdrop'.
+4. Formato de ejemplo (Videojuego/Visor):
 {
-  "name": "Nombre_Del_Proyecto",
-  "backdrop": { "name": "Nombre_Fondo", "url": "URL_DIRECTA_FONDO" },
-  "costumes": [
-    { "name": "Nombre_Personaje", "url": "URL_DIRECTA_DISFRAZ" }
-  ],
-  "variables": { "puntos": 0 },
-  "actions": [
-    { "type": "start" },
-    { "type": "move", "x": 0, "y": -40 },
-    { "type": "say", "text": "¡Saludos! Sean bienvenidas y bienvenidos.", "seconds": 3 },
-    { "type": "wait", "seconds": 1 },
-    { "type": "ask", "question": "¿Pregunta interactiva?", "answer": "Respuesta", "correct_say": "¡Exacto!", "incorrect_say": "No es correcto." }
+  "name": "Mi_Proyecto_Scratch",
+  "category": "videojuego",
+  "backdrop": { "name": "Fondo", "url": "URL_DIRECTA_FONDO" },
+  "variables": { "puntos": 0, "vidas": 3 },
+  "sprites": [
+    {
+      "name": "Jugador",
+      "costumes": [{ "name": "Disfraz", "url": "URL_IMAGEN" }],
+      "x": 0, "y": -120,
+      "scripts": [
+        [ { "type": "when_key", "key": "right arrow" }, { "type": "changex", "dx": 15 }, { "type": "bounce_edge" } ],
+        [ { "type": "when_key", "key": "left arrow" }, { "type": "changex", "dx": -15 }, { "type": "bounce_edge" } ]
+      ]
+    }
   ]
 }</pre>
                     </div>

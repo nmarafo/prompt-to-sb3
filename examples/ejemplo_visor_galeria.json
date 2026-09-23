@@ -1,0 +1,31 @@
+{
+  "name": "Visor_Galeria_Interactivo",
+  "category": "visor",
+  "description": "Visor interactivo de obras y fotografías con navegación por teclado y clics",
+  "backdrop": [
+    {
+      "name": "Nebulosa_Ojo_De_Gato",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Cat%27s_Eye_Nebula.jpg/320px-Cat%27s_Eye_Nebula.jpg"
+    },
+    {
+      "name": "Galaxia_Espiral",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/NGC_4414_%28NASA-med%29.jpg/320px-NGC_4414_%28NASA-med%29.jpg"
+    }
+  ],
+  "variables": {
+    "diapositiva": 1
+  },
+  "costumes": [
+    "costume1"
+  ],
+  "actions": [
+    { "type": "start" },
+    { "type": "move", "x": -160, "y": -120 },
+    { "type": "say", "text": "¡Bienvenidos al Visor Multimedia! Pulsen la tecla ESPACIO o FLECHA DERECHA para avanzar.", "seconds": 4 },
+    { "type": "when_key", "key": "space" },
+    { "type": "next_backdrop" },
+    { "type": "change_var", "name": "diapositiva", "by": 1 },
+    { "type": "playsound", "name": "pop" },
+    { "type": "say", "text": "Mostrando siguiente imagen del visor.", "seconds": 2 }
+  ]
+}

@@ -1,29 +1,57 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "PromptToSb3Project",
-  "description": "Esquema semántico de alto nivel para generación de proyectos Scratch 3.0 mediante agentes de IA y NotebookLM",
+  "title": "PromptToSb3UniversalProject",
+  "description": "Esquema universal para generación de proyectos Scratch 3.0 (Videojuegos, Visores, Animaciones, Simuladores y Apps) mediante agentes de Inteligencia Artificial",
   "type": "object",
-  "required": ["name", "actions"],
+  "required": ["name"],
   "properties": {
     "name": {
       "type": "string",
-      "description": "Nombre o título del proyecto Scratch"
+      "description": "Nombre o identificador del proyecto Scratch"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["videojuego", "visor", "animacion", "simulacion", "educativo", "general"],
+      "description": "Categoría o tipología del proyecto"
     },
     "description": {
       "type": "string",
-      "description": "Resumen didáctico o descripción pedagógica del proyecto"
+      "description": "Descripción general, objetivos interactivos o instrucciones de uso"
     },
     "backdrop": {
+      "description": "Fondo o lista de fondos del escenario",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "url": { "type": "string", "format": "uri" }
+          },
+          "required": ["name"]
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "url": { "type": "string", "format": "uri" }
+            },
+            "required": ["name"]
+          }
+        }
+      ]
+    },
+    "variables": {
       "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "url": { "type": "string", "format": "uri" }
-      },
-      "required": ["name"]
+      "description": "Variables de estado (puntuación, vidas, nivel, índice, etc.)",
+      "additionalProperties": {
+        "type": ["number", "string", "boolean"]
+      }
     },
     "costumes": {
       "type": "array",
-      "description": "Lista de disfraces o personajes principales",
+      "description": "Disfraces del sprite principal en modo sprite único",
       "items": {
         "anyOf": [
           { "type": "string" },
@@ -38,71 +66,106 @@
         ]
       }
     },
-    "variables": {
-      "type": "object",
-      "description": "Variables del proyecto y sus valores iniciales",
-      "additionalProperties": {
-        "type": ["number", "string", "boolean"]
-      }
-    },
     "actions": {
       "type": "array",
-      "description": "Secuencia cronológica de bloques y acciones pedagógicas",
+      "description": "Acciones directas para modo sprite único",
+      "items": { "$ref": "#/$defs/actionBlock" }
+    },
+    "scripts": {
+      "type": "array",
+      "description": "Múltiples pilas de bloques concurrentes (modo sprite único)",
+      "items": {
+        "type": "array",
+        "items": { "$ref": "#/$defs/actionBlock" }
+      }
+    },
+    "sprites": {
+      "type": "array",
+      "description": "Lista de sprites para proyectos multi-objeto (Videojuegos, Visores con botones, etc.)",
       "items": {
         "type": "object",
-        "required": ["type"],
+        "required": ["name"],
         "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "start",
-              "say",
-              "think",
-              "wait",
-              "move",
-              "glide",
-              "costume",
-              "backdrop",
-              "ask",
-              "set_var",
-              "change_var",
-              "repeat",
-              "playsound"
-            ]
-          },
-          "text": { "type": "string" },
-          "seconds": { "type": "number" },
-          "duration": { "type": "number" },
+          "name": { "type": "string" },
+          "visible": { "type": "boolean" },
           "x": { "type": "number" },
           "y": { "type": "number" },
-          "steps": { "type": "number" },
-          "name": { "type": "string" },
-          "question": { "type": "string" },
-          "answer": { "type": ["string", "number"] },
-          "correct_say": { "type": "string" },
-          "incorrect_say": { "type": "string" },
-          "value": { "type": ["string", "number"] },
-          "by": { "type": "number" },
-          "times": { "type": "integer", "minimum": 1 },
+          "size": { "type": "number" },
+          "direction": { "type": "number" },
+          "costumes": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "required": ["name"],
+                  "properties": {
+                    "name": { "type": "string" },
+                    "url": { "type": "string", "format": "uri" }
+                  }
+                }
+              ]
+            }
+          },
           "actions": {
             "type": "array",
-            "items": { "$ref": "#/$defs/actionItem" }
+            "items": { "$ref": "#/$defs/actionBlock" }
+          },
+          "scripts": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/actionBlock" }
+            }
           }
         }
       }
     }
   },
   "$defs": {
-    "actionItem": {
+    "actionBlock": {
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "start", "flag",
+            "when_key", "key",
+            "when_clicked", "click",
+            "broadcast", "when_receive", "receive",
+            "move", "changex", "changey", "setx", "sety",
+            "turn_right", "turn_left", "point_direction", "bounce_edge", "bounce", "glide",
+            "say", "think", "show", "hide", "costume", "next_costume", "backdrop", "next_backdrop",
+            "set_size", "change_size",
+            "wait", "forever", "repeat",
+            "ask", "playsound", "sound",
+            "set_var", "change_var"
+          ]
+        },
         "text": { "type": "string" },
         "seconds": { "type": "number" },
-        "steps": { "type": "number" },
+        "duration": { "type": "number" },
         "x": { "type": "number" },
-        "y": { "type": "number" }
+        "y": { "type": "number" },
+        "dx": { "type": "number" },
+        "dy": { "type": "number" },
+        "steps": { "type": "number" },
+        "degrees": { "type": "number" },
+        "direction": { "type": "number" },
+        "size": { "type": "number" },
+        "name": { "type": "string" },
+        "key": { "type": "string" },
+        "message": { "type": "string" },
+        "question": { "type": "string" },
+        "value": { "type": ["string", "number", "boolean"] },
+        "by": { "type": "number" },
+        "times": { "type": "integer", "minimum": 1 },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/actionBlock" }
+        }
       }
     }
   }
