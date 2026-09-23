@@ -27,6 +27,142 @@ function generateId(prefix = '') {
     return prefix + Math.random().toString(36).substring(2, 12).toUpperCase();
 }
 
+// Algoritmo MD5 autocontenido (RFC 1321) para generar hashes de 32 caracteres hexadecimales exigidos por el esquema de Scratch 3.0
+function calculateMd5(input) {
+    let bytes;
+    if (typeof input === 'string') {
+        bytes = new TextEncoder().encode(input);
+    } else if (input instanceof Uint8Array) {
+        bytes = input;
+    } else if (input instanceof ArrayBuffer) {
+        bytes = new Uint8Array(input);
+    } else {
+        bytes = new Uint8Array(0);
+    }
+
+    function safeAdd(x, y) {
+        const lsw = (x & 0xFFFF) + (y & 0xFFFF);
+        const msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+        return (msw << 16) | (lsw & 0xFFFF);
+    }
+    function bitRotateLeft(num, cnt) {
+        return (num << cnt) | (num >>> (32 - cnt));
+    }
+    function md5cmn(q, a, b, x, s, t) {
+        return safeAdd(bitRotateLeft(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b);
+    }
+    function md5ff(a, b, c, d, x, s, t) {
+        return md5cmn((b & c) | ((~b) & d), a, b, x, s, t);
+    }
+    function md5gg(a, b, c, d, x, s, t) {
+        return md5cmn((b & d) | (c & (~d)), a, b, x, s, t);
+    }
+    function md5hh(a, b, c, d, x, s, t) {
+        return md5cmn(b ^ c ^ d, a, b, x, s, t);
+    }
+    function md5ii(a, b, c, d, x, s, t) {
+        return md5cmn(c ^ (b | (~d)), a, b, x, s, t);
+    }
+
+    const nWords = (((bytes.length + 8) >> 6) + 1) * 16;
+    const x = new Int32Array(nWords);
+    for (let i = 0; i < bytes.length; i++) {
+        x[i >> 2] |= (bytes[i] & 0xFF) << ((i % 4) * 8);
+    }
+    x[bytes.length >> 2] |= 0x80 << ((bytes.length % 4) * 8);
+    x[nWords - 2] = (bytes.length * 8) & 0xFFFFFFFF;
+    x[nWords - 1] = Math.floor((bytes.length * 8) / 0x100000000);
+
+    let a = 1732584193, b = -271733879, c = -1732584194, d = 271733878;
+
+    for (let i = 0; i < x.length; i += 16) {
+        const olda = a, oldb = b, oldc = c, oldd = d;
+        a = md5ff(a, b, c, d, x[i], 7, -680876936);
+        d = md5ff(d, a, b, c, x[i + 1], 12, -389564586);
+        c = md5ff(c, d, a, b, x[i + 2], 17, 606105819);
+        b = md5ff(b, c, d, a, x[i + 3], 22, -1044525330);
+        a = md5ff(a, b, c, d, x[i + 4], 7, -176418897);
+        d = md5ff(d, a, b, c, x[i + 5], 12, 1200080426);
+        c = md5ff(c, d, a, b, x[i + 6], 17, -1473231341);
+        b = md5ff(b, c, d, a, x[i + 7], 22, -45705983);
+        a = md5ff(a, b, c, d, x[i + 8], 7, 1770035416);
+        d = md5ff(d, a, b, c, x[i + 9], 12, -1958414417);
+        c = md5ff(c, d, a, b, x[i + 10], 17, -42063);
+        b = md5ff(b, c, d, a, x[i + 11], 22, -1990404162);
+        a = md5ff(a, b, c, d, x[i + 12], 7, 1804603682);
+        d = md5ff(d, a, b, c, x[i + 13], 12, -40341101);
+        c = md5ff(c, d, a, b, x[i + 14], 17, -1502002290);
+        b = md5ff(b, c, d, a, x[i + 15], 22, 1236535329);
+
+        a = md5gg(a, b, c, d, x[i + 1], 5, -165796510);
+        d = md5gg(d, a, b, c, x[i + 6], 9, -1069501632);
+        c = md5gg(c, d, a, b, x[i + 11], 14, 643717713);
+        b = md5gg(b, c, d, a, x[i], 20, -373897302);
+        a = md5gg(a, b, c, d, x[i + 5], 5, -701558691);
+        d = md5gg(d, a, b, c, x[i + 10], 9, 38016083);
+        c = md5gg(c, d, a, b, x[i + 15], 14, -660478335);
+        b = md5gg(b, c, d, a, x[i + 4], 20, -405537848);
+        a = md5gg(a, b, c, d, x[i + 9], 5, 568446438);
+        d = md5gg(d, a, b, c, x[i + 14], 9, -1019803690);
+        c = md5gg(c, d, a, b, x[i + 3], 14, -187363961);
+        b = md5gg(b, c, d, a, x[i + 8], 20, 1163531501);
+        a = md5gg(a, b, c, d, x[i + 13], 5, -1444681467);
+        d = md5gg(d, a, b, c, x[i + 2], 9, -51403784);
+        c = md5gg(c, d, a, b, x[i + 7], 14, 1735328473);
+        b = md5gg(b, c, d, a, x[i + 12], 20, -1926607734);
+
+        a = md5hh(a, b, c, d, x[i + 5], 4, -378558);
+        d = md5hh(d, a, b, c, x[i + 8], 11, -2022574463);
+        c = md5hh(c, d, a, b, x[i + 11], 16, 1839030562);
+        b = md5hh(b, c, d, a, x[i + 14], 23, -35309556);
+        a = md5hh(a, b, c, d, x[i + 1], 4, -1530992060);
+        d = md5hh(d, a, b, c, x[i + 4], 11, 1272893353);
+        c = md5hh(c, d, a, b, x[i + 7], 16, -155497632);
+        b = md5hh(b, c, d, a, x[i + 10], 23, -1094730640);
+        a = md5hh(a, b, c, d, x[i + 13], 4, 681279174);
+        d = md5hh(d, a, b, c, x[i], 11, -358537222);
+        c = md5hh(c, d, a, b, x[i + 3], 16, -722521979);
+        b = md5hh(b, c, d, a, x[i + 6], 23, 76029189);
+        a = md5hh(a, b, c, d, x[i + 9], 4, -640364487);
+        d = md5hh(d, a, b, c, x[i + 12], 11, -421815835);
+        c = md5hh(c, d, a, b, x[i + 15], 16, 530742520);
+        b = md5hh(b, c, d, a, x[i + 2], 23, -995338651);
+
+        a = md5ii(a, b, c, d, x[i], 6, -198630844);
+        d = md5ii(d, a, b, c, x[i + 7], 10, 1126891415);
+        c = md5ii(c, d, a, b, x[i + 14], 15, -1416354905);
+        b = md5ii(b, c, d, a, x[i + 5], 21, -57434055);
+        a = md5ii(a, b, c, d, x[i + 12], 6, 1700485571);
+        d = md5ii(d, a, b, c, x[i + 3], 10, -1894986606);
+        c = md5ii(c, d, a, b, x[i + 10], 15, -1051523);
+        b = md5ii(b, c, d, a, x[i + 1], 21, -2054922799);
+        a = md5ii(a, b, c, d, x[i + 8], 6, 1873313359);
+        d = md5ii(d, a, b, c, x[i + 15], 10, -30611744);
+        c = md5ii(c, d, a, b, x[i + 6], 15, -1560198380);
+        b = md5ii(b, c, d, a, x[i + 13], 21, 1309151649);
+        a = md5ii(a, b, c, d, x[i + 4], 6, -145523070);
+        d = md5ii(d, a, b, c, x[i + 11], 10, -1120210379);
+        c = md5ii(c, d, a, b, x[i + 2], 15, 718787259);
+        b = md5ii(b, c, d, a, x[i + 9], 21, -343485551);
+
+        a = safeAdd(a, olda);
+        b = safeAdd(b, oldb);
+        c = safeAdd(c, oldc);
+        d = safeAdd(d, oldd);
+    }
+
+    function toHex(val) {
+        let hex = '';
+        for (let i = 0; i < 4; i++) {
+            const b = (val >> (i * 8)) & 0xFF;
+            hex += (b < 16 ? '0' : '') + b.toString(16);
+        }
+        return hex;
+    }
+
+    return (toHex(a) + toHex(b) + toHex(c) + toHex(d)).toLowerCase();
+}
+
 // Plantilla base estándar de Scratch 3.0
 const SCRATCH_TEMPLATE = {
     targets: [
@@ -251,7 +387,7 @@ class ScratchCompiler {
             inputs: {},
             fields: {},
             shadow: false,
-            topLevel: !parentId
+            topLevel: false
         };
 
         const type = (action.type || '').toLowerCase().replace(/[\s-]/g, '_');
@@ -266,8 +402,6 @@ class ScratchCompiler {
             case 'green_flag':
             case 'on_start':
                 block.opcode = "event_whenflagclicked";
-                block.x = action.x || 100;
-                block.y = action.y || 100;
                 break;
 
             case 'when_key':
@@ -277,8 +411,6 @@ class ScratchCompiler {
             case 'on_key':
                 block.opcode = "event_whenkeypressed";
                 block.fields.KEY_OPTION = [String(action.key || action.key_name || "space"), null];
-                block.x = action.x || 100;
-                block.y = action.y || 100;
                 break;
 
             case 'when_clicked':
@@ -289,8 +421,6 @@ class ScratchCompiler {
             case 'sprite_clicked':
             case 'on_click':
                 block.opcode = "event_whenthisspriteclicked";
-                block.x = action.x || 100;
-                block.y = action.y || 100;
                 break;
 
             case 'broadcast':
@@ -311,8 +441,6 @@ class ScratchCompiler {
                 block.opcode = "event_whenbroadcastreceived";
                 const rMsg = String(action.message || action.msg || action.broadcast || "mensaje1");
                 block.fields.BROADCAST_OPTION = [rMsg, generateId('bc_')];
-                block.x = action.x || 100;
-                block.y = action.y || 100;
                 break;
 
             // === MOVIMIENTO (JUEGOS Y VISORES) ===
@@ -560,7 +688,7 @@ class ScratchCompiler {
         return { id, block };
     }
 
-    compileActionsList(actionsList, parentId, variablesMap, blocksCollector) {
+    compileActionsList(actionsList, parentId, variablesMap, blocksCollector, startX = 100, startY = 100) {
         if (!actionsList || !Array.isArray(actionsList) || actionsList.length === 0) return null;
 
         let lastId = null;
@@ -576,8 +704,26 @@ class ScratchCompiler {
                 blocksCollector[res.id] = res.block;
                 if (lastId && blocksCollector[lastId]) {
                     blocksCollector[lastId].parent = res.id;
+                    blocksCollector[lastId].topLevel = false;
+                    delete blocksCollector[lastId].x;
+                    delete blocksCollector[lastId].y;
                 }
                 lastId = res.id;
+            }
+        }
+
+        // Configurar el bloque raíz de la pila
+        if (lastId && blocksCollector[lastId]) {
+            if (parentId === null) {
+                blocksCollector[lastId].topLevel = true;
+                blocksCollector[lastId].parent = null;
+                blocksCollector[lastId].x = Math.round(startX);
+                blocksCollector[lastId].y = Math.round(startY);
+            } else {
+                blocksCollector[lastId].topLevel = false;
+                blocksCollector[lastId].parent = parentId;
+                delete blocksCollector[lastId].x;
+                delete blocksCollector[lastId].y;
             }
         }
 
@@ -591,22 +737,29 @@ class ScratchCompiler {
                 let blob = null;
                 let assetId = "";
                 let filename = "";
+                let safeExt = "png";
 
                 if (typeof cost === 'object' && cost.url) {
                     blob = await this.fetchExternalImage(cost.url);
                     if (blob) {
-                        assetId = generateId('cost_').toLowerCase();
-                        const ext = (cost.url.split('.').pop().split('?')[0] || 'png').toLowerCase();
-                        filename = `${assetId}.${ext}`;
+                        try {
+                            const buf = await blob.arrayBuffer();
+                            assetId = calculateMd5(new Uint8Array(buf));
+                        } catch (e) {
+                            assetId = calculateMd5(cost.url || cost.name || generateId());
+                        }
+                        const rawExt = (cost.url.split('.').pop().split('?')[0] || 'png').toLowerCase();
+                        safeExt = ['png', 'svg', 'jpeg', 'jpg', 'bmp', 'gif'].includes(rawExt) ? rawExt : 'png';
+                        filename = `${assetId}.${safeExt}`;
                     }
                 }
 
-                if (blob) {
+                if (blob && assetId && filename) {
                     this.zip.file(filename, blob);
                     sprite.costumes.push({
                         name: costName,
-                        bitmapResolution: 1,
-                        dataFormat: filename.split('.').pop(),
+                        bitmapResolution: safeExt === 'svg' ? 1 : 1,
+                        dataFormat: safeExt,
                         assetId: assetId,
                         md5ext: filename,
                         rotationCenterX: 48,
@@ -691,14 +844,22 @@ class ScratchCompiler {
                 if (bd.url) {
                     const bdBlob = await this.fetchExternalImage(bd.url);
                     if (bdBlob) {
-                        const assetId = generateId('bd_').toLowerCase();
-                        const ext = (bd.url.split('.').pop().split('?')[0] || 'jpg').toLowerCase();
-                        const filename = `${assetId}.${ext}`;
+                        let assetId;
+                        try {
+                            const buf = await bdBlob.arrayBuffer();
+                            assetId = calculateMd5(new Uint8Array(buf));
+                        } catch (e) {
+                            assetId = calculateMd5(bd.url || bd.name || generateId());
+                        }
+                        const rawExt = (bd.url.split('.').pop().split('?')[0] || 'jpg').toLowerCase();
+                        const safeExt = ['png', 'svg', 'jpeg', 'jpg', 'bmp', 'gif'].includes(rawExt) ? rawExt : 'jpg';
+                        const filename = `${assetId}.${safeExt}`;
                         this.zip.file(filename, bdBlob);
 
                         const bdObj = {
                             name: bd.name || "FondoPersonalizado",
-                            dataFormat: ext,
+                            bitmapResolution: safeExt === 'svg' ? 1 : 1,
+                            dataFormat: safeExt,
                             assetId: assetId,
                             md5ext: filename,
                             rotationCenterX: 240,
@@ -791,14 +952,14 @@ class ScratchCompiler {
                     const acts = Array.isArray(script) ? script : (script.actions || []);
                     if (acts.length > 0) {
                         const firstAct = acts[0];
-                        if (firstAct && firstAct.x === undefined) firstAct.x = 100;
-                        if (firstAct && firstAct.y === undefined) firstAct.y = scriptOffsetY;
-                        this.compileActionsList(acts, null, variablesMap, sprite.blocks);
+                        const startX = (firstAct && typeof firstAct.x === 'number') ? firstAct.x : 100;
+                        const startY = (firstAct && typeof firstAct.y === 'number') ? firstAct.y : scriptOffsetY;
+                        this.compileActionsList(acts, null, variablesMap, sprite.blocks, startX, startY);
                         scriptOffsetY += 160;
                     }
                 }
             } else if (sDef.actions && Array.isArray(sDef.actions)) {
-                this.compileActionsList(sDef.actions, null, variablesMap, sprite.blocks);
+                this.compileActionsList(sDef.actions, null, variablesMap, sprite.blocks, 100, 100);
             }
 
             project.targets.push(sprite);
