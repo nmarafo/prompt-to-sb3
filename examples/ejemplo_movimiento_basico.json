@@ -1,0 +1,28 @@
+{
+  "name": "Animacion_Gato_Caminando",
+  "description": "Animación básica de desplazamiento y cambio de vestuario utilizando los recursos nativos de Scratch",
+  "backdrop": {
+    "name": "Fondo_Predeterminado"
+  },
+  "costumes": [
+    "costume1",
+    "costume2"
+  ],
+  "variables": {},
+  "actions": [
+    { "type": "start" },
+    { "type": "move", "x": -150, "y": 0 },
+    { "type": "say", "text": "¡Comencemos el recorrido por el escenario!", "seconds": 2 },
+    { "type": "move", "x": -100, "y": 0 },
+    { "type": "wait", "seconds": 0.5 },
+    { "type": "move", "x": -50, "y": 0 },
+    { "type": "wait", "seconds": 0.5 },
+    { "type": "move", "x": 0, "y": 0 },
+    { "type": "wait", "seconds": 0.5 },
+    { "type": "move", "x": 50, "y": 0 },
+    { "type": "wait", "seconds": 0.5 },
+    { "type": "move", "x": 100, "y": 0 },
+    { "type": "playsound", "name": "meow" },
+    { "type": "say", "text": "¡Hemos llegado a la meta con éxito!", "seconds": 3 }
+  ]
+}

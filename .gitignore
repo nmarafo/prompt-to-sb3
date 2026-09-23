@@ -1,0 +1,20 @@
+# OS metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors & IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary / testing files
+*.tmp
+*.log
+*.sb3
+!examples/*.sb3
+
+# Node / Package managers (si se usan en el futuro)
+node_modules/
+npm-debug.log*

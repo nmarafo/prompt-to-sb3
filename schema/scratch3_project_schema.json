@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scratch3ProjectJson",
+  "description": "Esquema formal simplificado para la estructura project.json nativa de Scratch 3.0 (scratch-vm)",
+  "type": "object",
+  "required": ["targets", "monitors", "extensions", "meta"],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["isStage", "name", "variables", "lists", "broadcasts", "blocks", "costumes", "sounds"],
+        "properties": {
+          "isStage": { "type": "boolean" },
+          "name": { "type": "string" },
+          "variables": { "type": "object" },
+          "lists": { "type": "object" },
+          "broadcasts": { "type": "object" },
+          "blocks": { "type": "object" },
+          "comments": { "type": "object" },
+          "currentCostume": { "type": "integer" },
+          "costumes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "assetId", "dataFormat", "md5ext"],
+              "properties": {
+                "name": { "type": "string" },
+                "assetId": { "type": "string" },
+                "dataFormat": { "type": "string" },
+                "md5ext": { "type": "string" },
+                "rotationCenterX": { "type": "number" },
+                "rotationCenterY": { "type": "number" }
+              }
+            }
+          },
+          "sounds": { "type": "array" }
+        }
+      }
+    },
+    "monitors": { "type": "array" },
+    "extensions": { "type": "array" },
+    "meta": {
+      "type": "object",
+      "required": ["semver"],
+      "properties": {
+        "semver": { "type": "string" },
+        "vm": { "type": "string" },
+        "agent": { "type": "string" }
+      }
+    }
+  }
+}

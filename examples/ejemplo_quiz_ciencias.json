@@ -1,0 +1,25 @@
+{
+  "name": "Quiz_Ciclo_Del_Agua",
+  "description": "Cuestionario interactivo sobre las etapas del ciclo del agua para Primaria y Secundaria",
+  "backdrop": {
+    "name": "Fondo_Blanco"
+  },
+  "costumes": [
+    "Gato_Docente"
+  ],
+  "variables": {
+    "puntos": 0
+  },
+  "actions": [
+    { "type": "start" },
+    { "type": "move", "x": 0, "y": 0 },
+    { "type": "say", "text": "¡Hola! Vamos a poner a prueba sus conocimientos sobre el ciclo del agua.", "seconds": 3 },
+    { "type": "set_var", "name": "puntos", "value": 0 },
+    { "type": "ask", "question": "¿Cómo se llama el proceso en el que el agua líquida pasa a estado gaseoso por el calor solar?", "answer": "evaporacion", "correct_say": "¡Correcto! Es la evaporación.", "incorrect_say": "La respuesta correcta es la evaporación." },
+    { "type": "wait", "seconds": 1 },
+    { "type": "ask", "question": "¿Y cuando el vapor de agua se enfría y forma las nubes?", "answer": "condensacion", "correct_say": "¡Muy bien! Se trata de la condensación.", "incorrect_say": "Es la condensación." },
+    { "type": "wait", "seconds": 1 },
+    { "type": "playsound", "name": "pop" },
+    { "type": "say", "text": "¡Excelente trabajo! Han completado la evaluación formativa.", "seconds": 3 }
+  ]
+}

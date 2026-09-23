@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PromptToSb3Project",
+  "description": "Esquema semántico de alto nivel para generación de proyectos Scratch 3.0 mediante agentes de IA y NotebookLM",
+  "type": "object",
+  "required": ["name", "actions"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nombre o título del proyecto Scratch"
+    },
+    "description": {
+      "type": "string",
+      "description": "Resumen didáctico o descripción pedagógica del proyecto"
+    },
+    "backdrop": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string", "format": "uri" }
+      },
+      "required": ["name"]
+    },
+    "costumes": {
+      "type": "array",
+      "description": "Lista de disfraces o personajes principales",
+      "items": {
+        "anyOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "url": { "type": "string", "format": "uri" }
+            }
+          }
+        ]
+      }
+    },
+    "variables": {
+      "type": "object",
+      "description": "Variables del proyecto y sus valores iniciales",
+      "additionalProperties": {
+        "type": ["number", "string", "boolean"]
+      }
+    },
+    "actions": {
+      "type": "array",
+      "description": "Secuencia cronológica de bloques y acciones pedagógicas",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "start",
+              "say",
+              "think",
+              "wait",
+              "move",
+              "glide",
+              "costume",
+              "backdrop",
+              "ask",
+              "set_var",
+              "change_var",
+              "repeat",
+              "playsound"
+            ]
+          },
+          "text": { "type": "string" },
+          "seconds": { "type": "number" },
+          "duration": { "type": "number" },
+          "x": { "type": "number" },
+          "y": { "type": "number" },
+          "steps": { "type": "number" },
+          "name": { "type": "string" },
+          "question": { "type": "string" },
+          "answer": { "type": ["string", "number"] },
+          "correct_say": { "type": "string" },
+          "incorrect_say": { "type": "string" },
+          "value": { "type": ["string", "number"] },
+          "by": { "type": "number" },
+          "times": { "type": "integer", "minimum": 1 },
+          "actions": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/actionItem" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "actionItem": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string" },
+        "text": { "type": "string" },
+        "seconds": { "type": "number" },
+        "steps": { "type": "number" },
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    }
+  }
+}

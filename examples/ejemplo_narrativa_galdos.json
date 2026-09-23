@@ -1,0 +1,34 @@
+{
+  "name": "Benito_Perez_Galdos_Gran_Canaria",
+  "description": "Recorrido histórico y literario interactivo con Benito Pérez Galdós en Las Palmas de Gran Canaria",
+  "backdrop": {
+    "name": "Las_Palmas_Historica",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Benito_P%C3%A9rez_Gald%C3%B3s_por_Sorolla.jpg/320px-Benito_P%C3%A9rez_Gald%C3%B3s_por_Sorolla.jpg"
+  },
+  "costumes": [
+    {
+      "name": "Don_Benito",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Benito_P%C3%A9rez_Gald%C3%B3s_por_Sorolla.jpg/320px-Benito_P%C3%A9rez_Gald%C3%B3s_por_Sorolla.jpg"
+    }
+  ],
+  "variables": {
+    "aciertos": 0
+  },
+  "actions": [
+    { "type": "start" },
+    { "type": "move", "x": 0, "y": -40 },
+    { "type": "say", "text": "¡Saludos! Sean bienvenidas y bienvenidos a la Gran Canaria del siglo XIX.", "seconds": 3 },
+    { "type": "wait", "seconds": 1 },
+    { "type": "say", "text": "Soy Benito Pérez Galdós, novelista y dramaturgo nacido en Las Palmas de Gran Canaria en 1843.", "seconds": 4 },
+    { "type": "move", "x": -60, "y": -40 },
+    { "type": "say", "text": "En mi infancia correteaba por las calles de Vegueta y Triana antes de partir hacia Madrid.", "seconds": 3 },
+    { "type": "wait", "seconds": 1 },
+    { "type": "ask", "question": "¿Recuerdan el nombre de mi monumental serie de novelas históricas?", "answer": "Episodios Nacionales", "correct_say": "¡Exacto! Los Episodios Nacionales retratan la historia española del siglo XIX.", "incorrect_say": "Se trata de los célebres 'Episodios Nacionales'." },
+    { "type": "wait", "seconds": 1 },
+    { "type": "say", "text": "Escribí obras fundamentales como 'Fortunata y Jacinta', 'Marianela' y 'Misericordia'.", "seconds": 4 },
+    { "type": "move", "x": 40, "y": -40 },
+    { "type": "say", "text": "La observación atenta y la empatía con la sociedad fueron siempre mis mayores herramientas.", "seconds": 3 },
+    { "type": "playsound", "name": "pop" },
+    { "type": "say", "text": "¡Gracias por acompañarme en este viaje literario por nuestras letras!", "seconds": 3 }
+  ]
+}
