@@ -153,42 +153,62 @@ class ScratchCompiler {
             topLevel: !parentId
         };
 
-        const type = (action.type || '').toLowerCase();
+        const type = (action.type || '').toLowerCase().replace(/[\s-]/g, '_');
 
         switch (type) {
             // === EVENTOS ===
             case 'start':
             case 'flag':
+            case 'when_flag_clicked':
+            case 'when_flag':
+            case 'flag_clicked':
+            case 'green_flag':
+            case 'on_start':
                 block.opcode = "event_whenflagclicked";
                 block.x = action.x || 100;
                 block.y = action.y || 100;
                 break;
 
             case 'when_key':
+            case 'when_key_pressed':
+            case 'key_pressed':
             case 'key':
+            case 'on_key':
                 block.opcode = "event_whenkeypressed";
-                block.fields.KEY_OPTION = [String(action.key || "space"), null];
+                block.fields.KEY_OPTION = [String(action.key || action.key_name || "space"), null];
                 block.x = action.x || 100;
                 block.y = action.y || 100;
                 break;
 
             case 'when_clicked':
             case 'click':
+            case 'when_this_sprite_clicked':
+            case 'when_sprite_clicked':
+            case 'this_sprite_clicked':
+            case 'sprite_clicked':
+            case 'on_click':
                 block.opcode = "event_whenthisspriteclicked";
                 block.x = action.x || 100;
                 block.y = action.y || 100;
                 break;
 
             case 'broadcast':
+            case 'broadcast_message':
+            case 'send_broadcast':
                 block.opcode = "event_broadcast";
-                const bMsg = String(action.message || "mensaje1");
+                const bMsg = String(action.message || action.msg || action.broadcast || "mensaje1");
                 block.inputs.BROADCAST_INPUT = [1, [11, bMsg, generateId('bc_')]];
                 break;
 
             case 'when_receive':
             case 'receive':
+            case 'when_broadcast_received':
+            case 'broadcast_received':
+            case 'on_broadcast':
+            case 'on_receive':
+            case 'on_message':
                 block.opcode = "event_whenbroadcastreceived";
-                const rMsg = String(action.message || "mensaje1");
+                const rMsg = String(action.message || action.msg || action.broadcast || "mensaje1");
                 block.fields.BROADCAST_OPTION = [rMsg, generateId('bc_')];
                 block.x = action.x || 100;
                 block.y = action.y || 100;
@@ -196,97 +216,131 @@ class ScratchCompiler {
 
             // === MOVIMIENTO (JUEGOS Y VISORES) ===
             case 'move':
+            case 'go_to':
+            case 'goto':
+            case 'go_to_xy':
+            case 'gotoxy':
+            case 'set_position':
+            case 'position':
+            case 'move_to':
                 if (action.x !== undefined || action.y !== undefined) {
                     block.opcode = "motion_gotoxy";
                     block.inputs.X = [1, [4, String(action.x || 0)]];
                     block.inputs.Y = [1, [4, String(action.y || 0)]];
                 } else {
                     block.opcode = "motion_movesteps";
-                    block.inputs.STEPS = [1, [4, String(action.steps || 10)]];
+                    block.inputs.STEPS = [1, [4, String(action.steps || action.val || 10)]];
                 }
                 break;
 
             case 'changex':
+            case 'change_x':
+            case 'change_x_by':
                 block.opcode = "motion_changexby";
-                block.inputs.DX = [1, [4, String(action.dx !== undefined ? action.dx : (action.by || 10))]];
+                const dxVal = action.dx !== undefined ? action.dx : (action.val !== undefined ? action.val : (action.by !== undefined ? action.by : 10));
+                block.inputs.DX = [1, [4, String(dxVal)]];
                 break;
 
             case 'changey':
+            case 'change_y':
+            case 'change_y_by':
                 block.opcode = "motion_changeyby";
-                block.inputs.DY = [1, [4, String(action.dy !== undefined ? action.dy : (action.by || 10))]];
+                const dyVal = action.dy !== undefined ? action.dy : (action.val !== undefined ? action.val : (action.by !== undefined ? action.by : 10));
+                block.inputs.DY = [1, [4, String(dyVal)]];
                 break;
 
             case 'setx':
+            case 'set_x':
+            case 'set_x_to':
                 block.opcode = "motion_setx";
-                block.inputs.X = [1, [4, String(action.x || 0)]];
+                block.inputs.X = [1, [4, String(action.x !== undefined ? action.x : (action.val || 0))]];
                 break;
 
             case 'sety':
+            case 'set_y':
+            case 'set_y_to':
                 block.opcode = "motion_sety";
-                block.inputs.Y = [1, [4, String(action.y || 0)]];
+                block.inputs.Y = [1, [4, String(action.y !== undefined ? action.y : (action.val || 0))]];
                 break;
 
             case 'turn_right':
+            case 'turnright':
+            case 'rotate_right':
                 block.opcode = "motion_turnright";
-                block.inputs.DEGREES = [1, [4, String(action.degrees || 15)]];
+                block.inputs.DEGREES = [1, [4, String(action.degrees || action.val || 15)]];
                 break;
 
             case 'turn_left':
+            case 'turnleft':
+            case 'rotate_left':
                 block.opcode = "motion_turnleft";
-                block.inputs.DEGREES = [1, [4, String(action.degrees || 15)]];
+                block.inputs.DEGREES = [1, [4, String(action.degrees || action.val || 15)]];
                 break;
 
             case 'point_direction':
+            case 'point_in_direction':
                 block.opcode = "motion_pointindirection";
-                block.inputs.DIRECTION = [1, [8, String(action.direction !== undefined ? action.direction : 90)]];
+                block.inputs.DIRECTION = [1, [8, String(action.direction !== undefined ? action.direction : (action.val !== undefined ? action.val : 90))]];
                 break;
 
             case 'bounce_edge':
             case 'bounce':
+            case 'if_on_edge_bounce':
+            case 'bounce_on_edge':
                 block.opcode = "motion_ifonedgebounce";
                 break;
 
             case 'glide':
+            case 'glide_to':
                 block.opcode = "motion_glidesecstoxy";
-                block.inputs.SECS = [1, [4, String(action.seconds || action.duration || 1)]];
+                block.inputs.SECS = [1, [4, String(action.seconds || action.duration || action.time || 1)]];
                 block.inputs.X = [1, [4, String(action.x || 0)]];
                 block.inputs.Y = [1, [4, String(action.y || 0)]];
                 break;
 
             // === APARIENCIA (VISORES, ANIMACIONES Y JUEGOS) ===
             case 'say':
-                if (action.seconds || action.duration) {
+            case 'say_for_secs':
+            case 'speak':
+                const sayDuration = action.seconds || action.duration || action.time;
+                if (sayDuration) {
                     block.opcode = "looks_sayforsecs";
-                    block.inputs.MESSAGE = [1, [10, String(action.text || "")]];
-                    block.inputs.SECS = [1, [4, String(action.seconds || action.duration)]];
+                    block.inputs.MESSAGE = [1, [10, String(action.text || action.msg || "")]];
+                    block.inputs.SECS = [1, [4, String(sayDuration)]];
                 } else {
                     block.opcode = "looks_say";
-                    block.inputs.MESSAGE = [1, [10, String(action.text || "")]];
+                    block.inputs.MESSAGE = [1, [10, String(action.text || action.msg || "")]];
                 }
                 break;
 
             case 'think':
-                if (action.seconds || action.duration) {
+            case 'think_for_secs':
+                const thinkDuration = action.seconds || action.duration || action.time;
+                if (thinkDuration) {
                     block.opcode = "looks_thinkforsecs";
-                    block.inputs.MESSAGE = [1, [10, String(action.text || "")]];
-                    block.inputs.SECS = [1, [4, String(action.seconds || action.duration)]];
+                    block.inputs.MESSAGE = [1, [10, String(action.text || action.msg || "")]];
+                    block.inputs.SECS = [1, [4, String(thinkDuration)]];
                 } else {
                     block.opcode = "looks_think";
-                    block.inputs.MESSAGE = [1, [10, String(action.text || "")]];
+                    block.inputs.MESSAGE = [1, [10, String(action.text || action.msg || "")]];
                 }
                 break;
 
             case 'show':
+            case 'appear':
                 block.opcode = "looks_show";
                 break;
 
             case 'hide':
+            case 'disappear':
                 block.opcode = "looks_hide";
                 break;
 
             case 'costume':
+            case 'switch_costume':
+            case 'switch_costume_to':
                 block.opcode = "looks_switchcostumeto";
-                block.inputs.COSTUME = [1, [10, String(action.name || "costume1")]];
+                block.inputs.COSTUME = [1, [10, String(action.name || action.costume || "costume1")]];
                 break;
 
             case 'next_costume':
@@ -294,8 +348,10 @@ class ScratchCompiler {
                 break;
 
             case 'backdrop':
+            case 'switch_backdrop':
+            case 'switch_backdrop_to':
                 block.opcode = "looks_switchbackdropto";
-                block.inputs.BACKDROP = [1, [10, String(action.name || "backdrop1")]];
+                block.inputs.BACKDROP = [1, [10, String(action.name || action.backdrop || "backdrop1")]];
                 break;
 
             case 'next_backdrop':
@@ -303,22 +359,29 @@ class ScratchCompiler {
                 break;
 
             case 'set_size':
+            case 'set_size_to':
                 block.opcode = "looks_setsizeto";
-                block.inputs.SIZE = [1, [4, String(action.size || 100)]];
+                block.inputs.SIZE = [1, [4, String(action.size || action.val || 100)]];
                 break;
 
             case 'change_size':
+            case 'change_size_by':
                 block.opcode = "looks_changesizeby";
-                block.inputs.CHANGE = [1, [4, String(action.by || 10)]];
+                block.inputs.CHANGE = [1, [4, String(action.by || action.val || 10)]];
                 break;
 
             // === CONTROL (BUCLES DE JUEGO, TEMPORIZADORES Y CONDICIONALES) ===
             case 'wait':
+            case 'sleep':
+            case 'pause':
+            case 'delay':
                 block.opcode = "control_wait";
-                block.inputs.DURATION = [1, [5, String(action.seconds || action.duration || 1)]];
+                block.inputs.DURATION = [1, [5, String(action.seconds || action.duration || action.time || action.val || 1)]];
                 break;
 
             case 'forever':
+            case 'loop':
+            case 'repeat_forever':
                 block.opcode = "control_forever";
                 if (action.actions && Array.isArray(action.actions)) {
                     const subFirstId = this.compileActionsList(action.actions, id, variablesMap, blocksCollector);
@@ -329,8 +392,10 @@ class ScratchCompiler {
                 break;
 
             case 'repeat':
+            case 'repeat_times':
+            case 'loop_times':
                 block.opcode = "control_repeat";
-                block.inputs.TIMES = [1, [6, String(action.times || 10)]];
+                block.inputs.TIMES = [1, [6, String(action.times || action.count || 10)]];
                 if (action.actions && Array.isArray(action.actions)) {
                     const subFirstId = this.compileActionsList(action.actions, id, variablesMap, blocksCollector);
                     if (subFirstId) {
@@ -341,32 +406,49 @@ class ScratchCompiler {
 
             // === SENSORES Y PREGUNTAS ===
             case 'ask':
+            case 'question':
+            case 'ask_and_wait':
                 block.opcode = "sensing_askandwait";
                 block.inputs.QUESTION = [1, [10, String(action.question || "¿Cuál es su respuesta?")]];
                 break;
 
             // === SONIDOS ===
             case 'playsound':
+            case 'play_sound':
             case 'sound':
+            case 'start_sound':
                 block.opcode = "sound_playuntildone";
-                block.inputs.SOUND_MENU = [1, [10, String(action.name || "pop")]];
+                block.inputs.SOUND_MENU = [1, [10, String(action.name || action.sound || "pop")]];
                 break;
 
             // === VARIABLES Y MARCADORES ===
             case 'set_var':
+            case 'set_variable':
+            case 'setvariable':
                 block.opcode = "data_setvariableto";
-                const varName = action.name || "puntos";
-                const varId = variablesMap[varName] || varName;
-                block.fields.VARIABLE = [varName, varId];
-                block.inputs.VALUE = [1, [10, String(action.value !== undefined ? action.value : 0)]];
+                const sVarName = action.variable || action.name || action.var || "puntos";
+                if (!variablesMap[sVarName]) {
+                    variablesMap[sVarName] = generateId('var_');
+                }
+                const sVarId = variablesMap[sVarName];
+                const sVal = action.val !== undefined ? action.val : (action.value !== undefined ? action.value : (action.to !== undefined ? action.to : 0));
+                block.fields.VARIABLE = [sVarName, sVarId];
+                block.inputs.VALUE = [1, [10, String(sVal)]];
                 break;
 
             case 'change_var':
+            case 'change_variable':
+            case 'changevariable':
+            case 'add_variable':
                 block.opcode = "data_changevariableby";
-                const cVarName = action.name || "puntos";
-                const cVarId = variablesMap[cVarName] || cVarName;
+                const cVarName = action.variable || action.name || action.var || "puntos";
+                if (!variablesMap[cVarName]) {
+                    variablesMap[cVarName] = generateId('var_');
+                }
+                const cVarId = variablesMap[cVarName];
+                const cVal = action.val !== undefined ? action.val : (action.by !== undefined ? action.by : (action.value !== undefined ? action.value : 1));
                 block.fields.VARIABLE = [cVarName, cVarId];
-                block.inputs.VALUE = [1, [4, String(action.by !== undefined ? action.by : 1)]];
+                block.inputs.VALUE = [1, [4, String(cVal)]];
                 break;
 
             default:
@@ -481,11 +563,29 @@ class ScratchCompiler {
             }
         }
 
-        // 2. Fondos del Escenario (Stage Backdrops)
+        // 2. Fondos del Escenario (Stage Backdrops: soporta 'backdrop' y 'backdrops')
+        const rawBackdrops = [];
+        if (inputJson.backdrops && Array.isArray(inputJson.backdrops)) {
+            rawBackdrops.push(...inputJson.backdrops);
+        }
         if (inputJson.backdrop) {
-            const backdropsList = Array.isArray(inputJson.backdrop) ? inputJson.backdrop : [inputJson.backdrop];
-            let isFirst = true;
+            if (Array.isArray(inputJson.backdrop)) rawBackdrops.push(...inputJson.backdrop);
+            else rawBackdrops.push(inputJson.backdrop);
+        }
 
+        // Deduplicar fondos por URL o por nombre
+        const seenBds = new Set();
+        const backdropsList = [];
+        for (const bd of rawBackdrops) {
+            const key = (bd && (bd.url || bd.name)) || '';
+            if (key && !seenBds.has(key)) {
+                seenBds.add(key);
+                backdropsList.push(bd);
+            }
+        }
+
+        if (backdropsList.length > 0) {
+            let isFirst = true;
             for (const bd of backdropsList) {
                 if (bd.url) {
                     const bdBlob = await this.fetchExternalImage(bd.url);
@@ -601,6 +701,13 @@ class ScratchCompiler {
             }
 
             project.targets.push(sprite);
+        }
+
+        // Sincronizar variables dinámicas descubiertas en acciones con el Stage
+        for (const [vName, vId] of Object.entries(variablesMap)) {
+            if (!project.targets[0].variables[vId]) {
+                project.targets[0].variables[vId] = [vName, 0];
+            }
         }
 
         // Pistas de audio base al ZIP
