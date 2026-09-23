@@ -148,75 +148,76 @@ Ejemplo mínimo:
                 <!-- Fase 0: Búsqueda de Assets en la Web con Deep Research -->
                 <div class="guide-step">
                     <div class="step-badge">
-                        <i data-lucide="search" size="14"></i> Fase 0: Búsqueda de Assets en la Web (Deep Research)
+                        <i data-lucide="search" size="14"></i> Paso 1: Búsqueda de Assets con Deep Research
                     </div>
                     <h3>Localización de Recursos Multimedia en Wikimedia Commons</h3>
                     <p>En <strong>Google NotebookLM</strong>, abra <em>+ Añadir fuentes > Buscar fuentes en la Web</em>:</p>
                     <p style="background: rgba(249, 115, 22, 0.15); border-left: 3px solid var(--accent); padding: 0.6rem 0.8rem; border-radius: 4px; font-size: 0.85rem; color: #fed7aa;">
-                        ⚠️ <strong>Paso Clave con Deep Research</strong>: Recuerden seleccionar la opción <strong>Deep Research (Investigación Profunda)</strong>. Deep Research generará un informe exhaustivo con las URLs directas de las imágenes. <strong>Añadan ese informe resultante como fuente</strong> al cuaderno para que NotebookLM pueda incluir las URLs exactas en el JSON de salida.
+                        ⚠️ <strong>Paso Preceptivo</strong>: Asegúrense de marcar <strong>Deep Research (Investigación Profunda)</strong>. Una vez generado el informe con la tabla de URLs, <strong>añádanlo como fuente activa</strong> al cuaderno.
                     </p>
                     <div class="code-box">
-                        <pre id="assets-prompt-text">Busca imágenes y recursos visuales en Wikimedia Commons y repositorios de acceso público sobre [INTRODUZCA TEMA, ej: Naves espaciales y asteroides / Obras de arte / Paisajes / Personajes].
-Requisitos técnicos:
-1. Necesito URLs directas a archivos de imagen (.png con fondo transparente o .svg, o fotografías .jpg panorámicas), alojadas preferiblemente en upload.wikimedia.org.
-2. Identifica:
-   - Imágenes para personajes, objetos o botones (Sprites).
-   - Imágenes panorámicas para escenarios o diapositivas (Backdrops).
-3. Presenta los resultados en una tabla clara: Elemento, Uso sugerido en Scratch y URL directa de la imagen.</pre>
+                        <pre id="assets-prompt-text">Actúa como un Documentalista Multimedia. Realiza una búsqueda profunda (Deep Research) en Wikimedia Commons y repositorios abiertos sobre: [TEMA O PERSONAJES, ej: Benito Pérez Galdós / Naves espaciales y meteoritos / Obras del Museo del Prado].
+
+Objetivo: Localizar recursos gráficos de acceso abierto con URLs directas de imagen para un proyecto interactivo en Scratch 3.0.
+Requisitos técnicos estrictos:
+1. Solo URLs directas a archivos de imagen (.jpg, .png con fondo transparente o .svg), preferiblemente en upload.wikimedia.org.
+2. Identifica al menos:
+   - De 2 a 4 Sprites (personajes, objetos móviles o botones con fondo limpio).
+   - De 2 a 3 Backdrops (escenarios panorámicos de fondo).
+3. Elabora un informe documental exhaustivo con una tabla final con las columnas:
+   | Nombre_Identificador | Tipo (Sprite / Backdrop) | Descripción Visual | URL Directa de Imagen |</pre>
                     </div>
                     <button class="btn-copy" onclick="copyText('assets-prompt-text', this)">
-                        <i data-lucide="copy" size="14"></i> Copiar Prompt de Búsqueda Web
+                        <i data-lucide="copy" size="14"></i> Copiar Prompt Deep Research
                     </button>
                 </div>
 
-                <!-- Fase 1: Diseño del Proyecto -->
+                <!-- Fase 2: Master Prompt JSON Optimizador -->
                 <div class="guide-step">
                     <div class="step-badge">
-                        <i data-lucide="layout" size="14"></i> Fase 1: Diseño de Mecánicas (Videojuego, Visor o App)
+                        <i data-lucide="cpu" size="14"></i> Paso 2: Master Prompt Universal (Chat de NotebookLM)
                     </div>
-                    <h3>Estructuración de la Experiencia Interactiva</h3>
-                    <p>Pegue esta instrucción en el chat de NotebookLM para definir las reglas y flujo del proyecto:</p>
+                    <h3>Generación Directa del JSON con Mecánicas y URLs</h3>
+                    <p>Pegue esta instrucción en el chat del cuaderno para obtener el JSON completo listo para compilar:</p>
                     <div class="code-box">
-                        <pre id="research-prompt-text">Actúa como un Diseñador y Programador de Software Interactivo en Scratch 3.0.
-A partir de las fuentes y elementos gráficos de este cuaderno, diseña la arquitectura de un proyecto [TIPO: videojuego / visor interactivo / simulación]:
-1. Objetivo y reglas de la experiencia.
-2. Objetos participantes (Sprites) y fondos (Backdrops) vinculando las URLs obtenidas en la Fase 0.
-3. Controles de usuario (teclas de flechas, espacio o clics con el ratón).
-4. Variables de estado ('puntos', 'vidas', 'diapositiva' o 'tiempo').</pre>
-                    </div>
-                    <button class="btn-copy" onclick="copyText('research-prompt-text', this)">
-                        <i data-lucide="copy" size="14"></i> Copiar Prompt Fase 1
-                    </button>
-                </div>
+                        <pre id="master-prompt-text">Actúa como un Desarrollador Senior de Scratch 3.0.
+A partir de las fuentes documentales de este cuaderno y del informe de Deep Research con las imágenes, genera el código JSON para la herramienta Scratch Compiler Tool (prompt-to-sb3).
 
-                <!-- Fase 2: Master Prompt JSON -->
-                <div class="guide-step">
-                    <div class="step-badge">
-                        <i data-lucide="cpu" size="14"></i> Fase 2: Generación del JSON Universal
-                    </div>
-                    <h3>Master Prompt para Videojuegos, Visores y Apps</h3>
-                    <p>Solicite a NotebookLM la conversión a JSON listo para el compilador:</p>
-                    <div class="code-box">
-                        <pre id="master-prompt-text">Basándote en el diseño anterior, genera el código JSON universal para la herramienta Scratch Compiler Tool (prompt-to-sb3).
+CONFIGURACIÓN DEL PROYECTO:
+- Tipo: [visor_interactivo | videojuego | animacion | simulacion] sobre [TEMA]
+- Distribuye los Sprites en coordenadas (x, y) equilibradas para evitar que se superpongan en pantalla.
 
-REGLAS TÉCNICAS OBLIGATORIAS:
-1. Devuelve ÚNICAMENTE el bloque JSON crudo (sin texto antes ni después).
-2. Para videojuegos o proyectos multi-objeto, utiliza el array 'sprites' con sus 'scripts' o 'actions'.
-3. Para visores o galerías, puedes usar un array en 'backdrop' con múltiples imágenes y la acción 'next_backdrop'.
-4. Formato de ejemplo (Videojuego/Visor):
+REGLAS TÉCNICAS ESTRICTAS:
+1. Responde ÚNICAMENTE con el bloque JSON crudo (sin texto antes ni después).
+2. Utiliza exactamente las URLs directas de imagen del informe de Deep Research para 'costumes' y 'backdrops'.
+3. Inicia cada script con un disparador válido: 'when_flag_clicked', 'when_key', 'when_this_sprite_clicked' o 'when_receive'.
+4. Acciones permitidas: 'go_to', 'changex', 'changey', 'bounce_edge', 'say' (con 'duration'), 'show', 'hide', 'next_backdrop', 'broadcast', 'change_variable' (con 'variable' y 'val'), 'wait' y 'forever'.
+
+Formato de ejemplo:
 {
-  "name": "Mi_Proyecto_Scratch",
-  "category": "videojuego",
-  "backdrop": { "name": "Fondo", "url": "URL_DIRECTA_FONDO" },
-  "variables": { "puntos": 0, "vidas": 3 },
+  "name": "Proyecto_Scratch",
+  "category": "visor_interactivo",
+  "backdrops": [
+    { "name": "Fondo_1", "url": "URL_DIRECTA_FONDO_1" },
+    { "name": "Fondo_2", "url": "URL_DIRECTA_FONDO_2" }
+  ],
+  "variables": { "puntos": 0, "diapositiva": 1 },
   "sprites": [
     {
-      "name": "Jugador",
+      "name": "Personaje",
       "costumes": [{ "name": "Disfraz", "url": "URL_IMAGEN" }],
-      "x": 0, "y": -120,
+      "x": -100, "y": 0,
       "scripts": [
-        [ { "type": "when_key", "key": "right arrow" }, { "type": "changex", "dx": 15 }, { "type": "bounce_edge" } ],
-        [ { "type": "when_key", "key": "left arrow" }, { "type": "changex", "dx": -15 }, { "type": "bounce_edge" } ]
+        [
+          { "type": "when_flag_clicked" },
+          { "type": "go_to", "x": -100, "y": 0 },
+          { "type": "say", "text": "¡Bienvenidos!", "duration": 4 }
+        ],
+        [
+          { "type": "when_key", "key": "space" },
+          { "type": "next_backdrop" },
+          { "type": "change_variable", "variable": "puntos", "val": 10 }
+        ]
       ]
     }
   ]

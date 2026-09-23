@@ -59,84 +59,91 @@ La herramienta **prompt-to-sb3** resuelve la dificultad que tienen los modelos d
 
 ---
 
-## 🚀 Flujo de Trabajo en Google NotebookLM (Protocolo Universal de 3 Fases)
+## 🚀 Flujo de Trabajo Optimizado en Google NotebookLM (Protocolo en 2 Pasos)
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                        PROTOCOLO UNIVERSAL DE 3 FASES CON NOTEBOOKLM                   │
-├────────────────────────┬───────────────────────────────┬───────────────────────────────┤
-│  FASE 0: ASSETS WEB    │  FASE 1: DISEÑO DEL PROYECTO  │  FASE 2: MASTER PROMPT JSON   │
-├────────────────────────┼───────────────────────────────┼───────────────────────────────┤
-│ En "Buscar fuentes en  │ En el chat del cuaderno:      │ En el chat del cuaderno:      │
-│ la Web", localizar     │ Diseñar las mecánicas (juego, │ Generar el JSON estructurado  │
-│ imágenes en Wikimedia  │ visor, controles y variables) │ universal con las URLs de     │
-│ con enlace directo.    │ a partir de las fuentes.      │ assets y acciones interactivas│
-└────────────────────────┴───────────────────────────────┴───────────────────────────────┘
+│                        PROTOCOLO OPTIMIZADO EN 2 PASOS CON NOTEBOOKLM                  │
+├────────────────────────────────────────────────┬───────────────────────────────────────┤
+│  PASO 1: BÚSQUEDA WEB CON DEEP RESEARCH       │  PASO 2: MASTER PROMPT UNIVERSAL      │
+├────────────────────────────────────────────────┼───────────────────────────────────────┤
+│ En "Buscar fuentes en la Web", activar         │ En el chat del cuaderno:              │
+│ Deep Research para generar el informe con      │ Generar el JSON estructurado crudo    │
+│ las URLs directas e incorporarlo como fuente.  │ con mecánicas, balanceo y las URLs.   │
+└────────────────────────────────────────────────┴───────────────────────────────────────┘
 ```
 
 ---
 
-### 🔍 Fase 0: Búsqueda de Fuentes y Assets con Deep Research
+### 🔍 Paso 1: Búsqueda de Fuentes y Assets con Deep Research
 
 En su cuaderno de Google NotebookLM, abran el panel lateral de fuentes (`+ Añadir fuentes`) y seleccionen **«Buscar fuentes en la Web»**:
 
 > ⚠️ **Paso Preceptivo: Seleccionar Deep Research**:
-> Asegúrense de **marcar o seleccionar la opción `Deep Research` (Investigación Profunda)** antes de ejecutar la búsqueda. Al activar Deep Research, el sistema realizará un análisis exhaustivo y generará un **informe completo con las URLs directas verificadas** a los archivos de imagen.
+> Asegúrense de **marcar la opción `Deep Research` (Investigación Profunda)** antes de pulsar buscar. Deep Research rastreará la red y elaborará un **informe exhaustivo con las URLs directas verificadas** de Wikimedia Commons.
 > 
-> **Añadan ese informe resultante como fuente activa al cuaderno**. Este paso es imprescindible para que el agente tenga las URLs en su memoria contextual y pueda volcarlas con absoluta fidelidad en el JSON de salida.
+> **Añadan ese informe resultante como fuente activa al cuaderno**. Este paso es imprescindible para que el modelo no invente enlaces inexistentes y utilice las URLs exactas de los recursos en el JSON de salida.
 
-Peguen la siguiente instrucción adaptando el tema entre corchetes:
+Peguen la siguiente instrucción en la barra de búsqueda web:
 
 ```text
-Busca imágenes y recursos visuales en Wikimedia Commons y repositorios de acceso público sobre [INTRODUZCA TEMA, ej: Naves espaciales y meteoritos / Obras de arte / Paisajes / Personajes].
-Requisitos técnicos:
-1. Necesito URLs directas a archivos de imagen (.png con fondo transparente o .svg, o fotografías .jpg panorámicas), alojadas preferiblemente en upload.wikimedia.org.
-2. Identifica:
-   - Imágenes para personajes, objetos o botones (Sprites).
-   - Imágenes panorámicas para escenarios o diapositivas (Backdrops).
-3. Presenta los resultados en una tabla clara: Elemento, Uso sugerido en Scratch y URL directa de la imagen.
+Actúa como un Documentalista Multimedia. Realiza una búsqueda profunda (Deep Research) en Wikimedia Commons y repositorios abiertos sobre: [TEMA O PERSONAJES, ej: Benito Pérez Galdós / Naves espaciales y meteoritos / Obras del Museo del Prado].
+
+Objetivo: Localizar recursos gráficos de acceso abierto con URLs directas de imagen para un proyecto interactivo en Scratch 3.0.
+Requisitos técnicos estrictos:
+1. Solo URLs directas a archivos de imagen (.jpg, .png con fondo transparente o .svg), preferiblemente en upload.wikimedia.org.
+2. Identifica al menos:
+   - De 2 a 4 Sprites (personajes, objetos móviles o botones con fondo limpio).
+   - De 2 a 3 Backdrops (escenarios panorámicos de fondo).
+3. Elabora un informe documental exhaustivo con una tabla final con las columnas:
+   | Nombre_Identificador | Tipo (Sprite / Backdrop) | Descripción Visual | URL Directa de Imagen |
 ```
 
 ---
 
-### 📝 Fase 1: Prompt de Diseño del Proyecto
+### ⚡ Paso 2: Master Prompt Universal (Chat de NotebookLM)
 
-En el chat de NotebookLM, introduzcan:
-
-```text
-Actúa como un Diseñador y Programador de Software Interactivo en Scratch 3.0.
-A partir de las fuentes y elementos gráficos de este cuaderno, diseña la arquitectura de un proyecto [TIPO: videojuego / visor interactivo / simulación / animación]:
-1. Objetivo y reglas de la experiencia.
-2. Objetos participantes (Sprites) y fondos (Backdrops) vinculando las URLs obtenidas en la Fase 0.
-3. Controles de usuario (teclas de flechas, espacio o clics con el ratón).
-4. Variables de estado ('puntos', 'vidas', 'diapositiva' o 'tiempo').
-```
-
----
-
-### ⚡ Fase 2: Master Prompt de Generación del JSON Universal
+Una vez añadido el informe de Deep Research como fuente documental, peguen la siguiente instrucción en el chat del cuaderno para obtener el JSON completo listo para compilar:
 
 ```text
-Basándote en el diseño anterior, genera el código JSON universal para la herramienta Scratch Compiler Tool (prompt-to-sb3).
+Actúa como un Desarrollador Senior de Scratch 3.0.
+A partir de las fuentes documentales de este cuaderno y del informe de Deep Research con las imágenes, genera el código JSON para la herramienta Scratch Compiler Tool (prompt-to-sb3).
 
-REGLAS TÉCNICAS OBLIGATORIAS:
-1. Devuelve ÚNICAMENTE el bloque JSON crudo (sin texto antes ni después).
-2. Para videojuegos o proyectos multi-objeto, utiliza el array 'sprites' con sus 'scripts' o 'actions'.
-3. Para visores o galerías, puedes usar un array en 'backdrop' con múltiples imágenes y la acción 'next_backdrop'.
-4. Formato de ejemplo (Videojuego/Visor):
+CONFIGURACIÓN DEL PROYECTO:
+- Tipo: [visor_interactivo | videojuego | animacion | simulacion] sobre [TEMA]
+- Distribuye los Sprites en coordenadas (x, y) equilibradas para evitar que se superpongan en pantalla.
+
+REGLAS TÉCNICAS ESTRICTAS:
+1. Responde ÚNICAMENTE con el bloque JSON crudo (sin texto antes ni después).
+2. Utiliza exactamente las URLs directas de imagen del informe de Deep Research para 'costumes' y 'backdrops'.
+3. Inicia cada script con un disparador válido: 'when_flag_clicked', 'when_key', 'when_this_sprite_clicked' o 'when_receive'.
+4. Acciones permitidas: 'go_to', 'changex', 'changey', 'bounce_edge', 'say' (con 'duration'), 'show', 'hide', 'next_backdrop', 'broadcast', 'change_variable' (con 'variable' y 'val'), 'wait' y 'forever'.
+
+Formato de ejemplo:
 {
-  "name": "Mi_Proyecto_Scratch",
-  "category": "videojuego",
-  "backdrop": { "name": "Fondo", "url": "URL_DIRECTA_FONDO" },
-  "variables": { "puntos": 0, "vidas": 3 },
+  "name": "Proyecto_Scratch",
+  "category": "visor_interactivo",
+  "backdrops": [
+    { "name": "Fondo_1", "url": "URL_DIRECTA_FONDO_1" },
+    { "name": "Fondo_2", "url": "URL_DIRECTA_FONDO_2" }
+  ],
+  "variables": { "puntos": 0, "diapositiva": 1 },
   "sprites": [
     {
-      "name": "Jugador",
+      "name": "Personaje",
       "costumes": [{ "name": "Disfraz", "url": "URL_IMAGEN" }],
-      "x": 0, "y": -120,
+      "x": -100, "y": 0,
       "scripts": [
-        [ { "type": "when_key", "key": "right arrow" }, { "type": "changex", "dx": 15 }, { "type": "bounce_edge" } ],
-        [ { "type": "when_key", "key": "left arrow" }, { "type": "changex", "dx": -15 }, { "type": "bounce_edge" } ]
+        [
+          { "type": "when_flag_clicked" },
+          { "type": "go_to", "x": -100, "y": 0 },
+          { "type": "say", "text": "¡Bienvenidos!", "duration": 4 }
+        ],
+        [
+          { "type": "when_key", "key": "space" },
+          { "type": "next_backdrop" },
+          { "type": "change_variable", "variable": "puntos", "val": 10 }
+        ]
       ]
     }
   ]
@@ -145,7 +152,23 @@ REGLAS TÉCNICAS OBLIGATORIAS:
 
 ---
 
-### 📥 Fase 3: Compilación y Carga en Scratch
+### 🎮 Variante Rápida para Videojuegos Arcade
+
+Si desean generar directamente un **videojuego interactivo con mecánicas arcade**, pueden utilizar esta formulación en el chat:
+
+```text
+Actúa como un Programador de Videojuegos en Scratch 3.0.
+A partir de las fuentes y el informe de Deep Research, genera el JSON para un videojuego arcade sobre [TEMA]:
+1. Objeto 'Jugador': controlado por flechas izquierda/derecha ('when_key', 'changex', 'bounce_edge').
+2. Objeto 'Obstaculo': cae verticalmente en bucle continuo ('forever', 'changey', 'wait').
+3. Variables: 'puntos' y 'vidas'.
+4. Asigna las URLs de Wikimedia Commons para el fondo y los sprites.
+5. Devuelve ÚNICAMENTE el código JSON crudo conforme a la estructura de prompt-to-sb3.
+```
+
+---
+
+### 📥 Paso 3: Compilación y Carga en Scratch
 
 1. Abran el compilador web en **[https://nmarafo.github.io/prompt-to-sb3/](https://nmarafo.github.io/prompt-to-sb3/)** o abran `index.html` localmente.
 2. Peguen el JSON generado en el editor.
