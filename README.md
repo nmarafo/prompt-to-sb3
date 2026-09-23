@@ -3,7 +3,10 @@
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/deed.es)
 [![Framework: OKF](https://img.shields.io/badge/Framework-Open%20Knowledge%20Framework-blue.svg)](https://github.com/nmarafo)
 [![Scratch: 3.0 Compatible](https://img.shields.io/badge/Scratch-3.0%20Compatible-orange.svg)](https://scratch.mit.edu)
+[![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-brightgreen.svg)](https://nmarafo.github.io/prompt-to-sb3/)
 [![Author: Norberto Martín Afonso](https://img.shields.io/badge/Author-Norberto%20Mart%C3%ADn%20Afonso-green.svg)](https://x.com/NorbertoMartnAf)
+
+> 🚀 **Aplicación web en vivo**: Pueden acceder directamente al compilador sin instalación previa en **[https://nmarafo.github.io/prompt-to-sb3/](https://nmarafo.github.io/prompt-to-sb3/)**.
 
 **prompt-to-sb3** es un ecosistema de código y conocimiento abierto basado en el estándar **Open Knowledge Framework (OKF)** que permite transformar documentos de investigación, situaciones de aprendizaje y consignas didácticas en proyectos interactivos ejecutables de **Scratch 3.0 (`.sb3`)**, utilizando **Google NotebookLM** y agentes de Inteligencia Artificial generativa.
 
