@@ -76,9 +76,16 @@ La herramienta **prompt-to-sb3** resuelve la dificultad que tienen los modelos d
 
 ---
 
-### 🔍 Fase 0: Prompt para «Buscar nuevas fuentes en la Web» (Assets Multimedia)
+### 🔍 Fase 0: Búsqueda de Fuentes y Assets con Deep Research
 
-En su cuaderno de Google NotebookLM, abran el panel lateral de fuentes (`+ Añadir fuentes`), hagan clic en **«Buscar fuentes en la Web»** y peguen la siguiente instrucción adaptando el tema entre corchetes:
+En su cuaderno de Google NotebookLM, abran el panel lateral de fuentes (`+ Añadir fuentes`) y seleccionen **«Buscar fuentes en la Web»**:
+
+> ⚠️ **Paso Preceptivo: Seleccionar Deep Research**:
+> Asegúrense de **marcar o seleccionar la opción `Deep Research` (Investigación Profunda)** antes de ejecutar la búsqueda. Al activar Deep Research, el sistema realizará un análisis exhaustivo y generará un **informe completo con las URLs directas verificadas** a los archivos de imagen.
+> 
+> **Añadan ese informe resultante como fuente activa al cuaderno**. Este paso es imprescindible para que el agente tenga las URLs en su memoria contextual y pueda volcarlas con absoluta fidelidad en el JSON de salida.
+
+Peguen la siguiente instrucción adaptando el tema entre corchetes:
 
 ```text
 Busca imágenes y recursos visuales en Wikimedia Commons y repositorios de acceso público sobre [INTRODUZCA TEMA, ej: Naves espaciales y meteoritos / Obras de arte / Paisajes / Personajes].

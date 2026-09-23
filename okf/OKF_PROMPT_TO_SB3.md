@@ -143,3 +143,14 @@ Estructura plana y compacta:
 | | `change_var` | `name`, `by` | Sumar a variable |
 | **Interacción**| `ask` | `question` | Preguntar y esperar |
 | **Sonido** | `playsound` | `name` ("pop", "meow") | Tocar sonido |
+
+---
+
+## 4. Metodología Deep Research en Google NotebookLM
+
+Para garantizar que el modelo disponga de URLs reales, accesibles y verificadas de los recursos multimedia:
+
+1. **Selección de Deep Research**: Al iniciar la búsqueda de recursos en la web dentro de NotebookLM, es imprescindible seleccionar la opción **Deep Research** (Investigación Profunda).
+2. **Generación del Informe**: Deep Research rastrea repositorios abiertos (como Wikimedia Commons) y compila un informe documental exhaustivo que contiene las tablas con las URLs directas de las imágenes (`.png`, `.svg`, `.jpg`).
+3. **Incorporación como Fuente**: Dicho informe generado debe añadirse explícitamente como **fuente** (*source*) del cuaderno de NotebookLM.
+4. **Inclusión en el Output**: Al redactar el Master Prompt para generar el JSON, el modelo cruzará el diseño interactivo con el informe de Deep Research, incorporando con total precisión las URLs de los disfraces (`costumes`) y fondos (`backdrop`) en el archivo final.

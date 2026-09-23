@@ -4,9 +4,15 @@ Esta guía proporciona las plantillas de instrucciones optimizadas para utilizar
 
 ---
 
-## 🔍 Fase 0: Prompt Universal para "Buscar nuevas fuentes en la Web" (Assets Multimedia)
+## 🔍 Fase 0: Búsqueda de Fuentes y Assets en la Web con Deep Research
 
-En **Google NotebookLM**, abran el panel de **Fuentes** (`+ Añadir fuentes > Buscar fuentes en la Web`) y peguen el prompt adaptado a la tipología de su proyecto:
+Para que el modelo localice URLs directas funcionales y fiables de imágenes y fondos:
+
+1. En **Google NotebookLM** (o Gemini), abran el panel de **Fuentes** (`+ Añadir fuentes > Buscar fuentes en la Web`).
+2. **IMPORTANTE**: Asegúrense de **seleccionar la opción `Deep Research` (Investigación Profunda)** antes de lanzar la consulta. Esto activará un rastreo exhaustivo en la red y generará un **informe estructurado con todas las URLs directas** de los recursos multimedia encontrados.
+3. Una vez generado dicho informe, **añádanlo como fuente al cuaderno de NotebookLM**. Al figurar entre las fuentes activas, el agente podrá consultar directamente las URLs e incluirlas de manera exacta en el JSON de salida.
+
+Peguen la siguiente instrucción en la búsqueda:
 
 ```text
 Busca imágenes y recursos visuales en Wikimedia Commons y repositorios de acceso público sobre [INTRODUZCA TEMA, ej: Naves espaciales y meteoritos / Obras de arte / Paisajes naturales / Personajes históricos].

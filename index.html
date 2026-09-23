@@ -145,13 +145,16 @@ Ejemplo mínimo:
                 <button class="close-btn" id="close-guide">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Fase 0: Búsqueda de Assets en la Web -->
+                <!-- Fase 0: Búsqueda de Assets en la Web con Deep Research -->
                 <div class="guide-step">
                     <div class="step-badge">
-                        <i data-lucide="search" size="14"></i> Fase 0: Búsqueda de Assets en la Web (NotebookLM)
+                        <i data-lucide="search" size="14"></i> Fase 0: Búsqueda de Assets en la Web (Deep Research)
                     </div>
                     <h3>Localización de Recursos Multimedia en Wikimedia Commons</h3>
-                    <p>En <strong>Google NotebookLM</strong>, abra <em>+ Añadir fuentes > Buscar fuentes en la Web</em> y pegue este prompt para obtener enlaces directos a imágenes (.png con transparencia, .svg o fotos .jpg):</p>
+                    <p>En <strong>Google NotebookLM</strong>, abra <em>+ Añadir fuentes > Buscar fuentes en la Web</em>:</p>
+                    <p style="background: rgba(249, 115, 22, 0.15); border-left: 3px solid var(--accent); padding: 0.6rem 0.8rem; border-radius: 4px; font-size: 0.85rem; color: #fed7aa;">
+                        ⚠️ <strong>Paso Clave con Deep Research</strong>: Recuerden seleccionar la opción <strong>Deep Research (Investigación Profunda)</strong>. Deep Research generará un informe exhaustivo con las URLs directas de las imágenes. <strong>Añadan ese informe resultante como fuente</strong> al cuaderno para que NotebookLM pueda incluir las URLs exactas en el JSON de salida.
+                    </p>
                     <div class="code-box">
                         <pre id="assets-prompt-text">Busca imágenes y recursos visuales en Wikimedia Commons y repositorios de acceso público sobre [INTRODUZCA TEMA, ej: Naves espaciales y asteroides / Obras de arte / Paisajes / Personajes].
 Requisitos técnicos:
